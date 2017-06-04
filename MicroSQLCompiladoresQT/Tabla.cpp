@@ -1,6 +1,3 @@
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif
 
 #include "Tabla.h"
 void Tabla::limpiaBuffer()
@@ -23,9 +20,8 @@ Tabla::Tabla()
 		decl.append_attribute("standalone") = "no";
 
 		this->tabla = this->documento.append_child("tabla");
-
-		pugi::xml_node defi = this->tabla.append_child("definicion");
-		pugi::xml_node registros = this->tabla.append_child("registros");
+        this->tabla.append_child("definicion");
+        this->tabla.append_child("registros");
 		this->documento.save_file("file.xml");
 	}
 	if (result)
@@ -57,9 +53,8 @@ Tabla::Tabla(std::string nombre)
 		decl.append_attribute("standalone") = "no";
 
 		this->tabla = this->documento.append_child("tabla");
-
-		pugi::xml_node defi = this->tabla.append_child("definicion");
-		pugi::xml_node registros = this->tabla.append_child("registros");
+        this->tabla.append_child("definicion");
+        this->tabla.append_child("registros");
 		this->documento.save_file(nombre.c_str());
 	}
 	if (result)
@@ -253,6 +248,7 @@ std::vector<str_registro> Tabla::consultarRegistro(str_registro busqueda)
 		}
 		if (flag)
 			ret.push_back(registro);
+        flag = true;
 	}
 	return ret;
 }
@@ -291,7 +287,7 @@ bool Tabla::existColumns(std::vector<std::string> nombre_atributos)
 {
 	if (nombre_atributos.size() <= 0)
 		return false;
-	int i = 0;
+    unsigned i = 0;
 	for (auto x : nombre_atributos)
 	{
 		for (auto y : this->definicion)
