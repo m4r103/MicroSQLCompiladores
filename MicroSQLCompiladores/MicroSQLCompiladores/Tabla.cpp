@@ -253,6 +253,7 @@ std::vector<str_registro> Tabla::consultarRegistro(str_registro busqueda)
 		}
 		if (flag)
 			ret.push_back(registro);
+		flag = true;
 	}
 	return ret;
 }
