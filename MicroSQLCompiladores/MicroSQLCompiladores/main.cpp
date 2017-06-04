@@ -13,9 +13,11 @@ int main()
 
 	str_registro miRegistro;
 
-	miRegistro.atributo_valor.insert(std::pair <std::string, std::string> ("Nombre", "Orange"));
-	miRegistro.atributo_valor.insert(std::pair <std::string, std::string> ("Apellido", "Pekoe"));
-	miRegistro.atributo_valor.insert(std::pair <std::string, std::string> ("Telefono", "55555"));
+
+	std::vector<std::string> attrib = { "Nombre","Apellido","Telefono" };
+	std::vector<std::string> valor = { "Orange", "Pekoe","55555" };
+
+	miRegistro.generateRegistro(attrib, valor);
 
 	miTabla.insertarRegistro(miRegistro);
 
@@ -26,6 +28,14 @@ int main()
 	miRegistro2.atributo_valor.insert(std::pair <std::string, std::string> ("Telefono", "7777777"));
 
 	miTabla.insertarRegistro(miRegistro2);
+
+	miRegistro2.atributo_valor.clear();
+
+	miRegistro2.atributo_valor.insert(std::pair <std::string, std::string>("Nombre", "Orange"));
+
+	miTabla.removeRegistro(miRegistro2);
+
+
 
 	std::vector<str_registro> registros = miTabla.consultarRegistro(miRegistro);
 

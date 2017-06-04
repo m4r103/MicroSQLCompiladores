@@ -9,10 +9,23 @@
 
 struct _registro
 {
+	_registro() {};
 	/*La llave es el atributo y el valor el valor*/
 	std::map<std::string, std::string> atributo_valor; 
 	/*Id dentro del xml*/
 	int id;
+	void generateRegistro(std::vector<std::string> attrib, std::vector<std::string> valor)
+	{
+		if (attrib.size() != valor.size())
+		{
+			std::cout << "Faltan parametros" << std::endl;
+			return;
+		}
+		for (unsigned i = 0; i < attrib.size(); i++)
+		{
+			atributo_valor.insert(std::pair<std::string, std::string>(attrib[i], valor[i]));
+		}
+	}
 };
 
 typedef _registro str_registro;
