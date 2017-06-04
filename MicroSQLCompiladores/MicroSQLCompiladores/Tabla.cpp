@@ -39,6 +39,39 @@ Tabla::Tabla()
 		}
 	}
 }
+/*Crea una nueva tabla con un nombre especificado*/
+Tabla::Tabla(std::string nombre)
+{
+	nombre += ".xml";
+	pugi::xml_parse_result result = documento.load_file(nombre.c_str());
+	if (!result)
+	{
+		std::cout << "Creando archivo" << std::endl;
+		pugi::xml_node decl = documento.prepend_child(pugi::node_declaration);
+		decl.append_attribute("version") = "1.0";
+		decl.append_attribute("encoding") = "UTF-8";
+		decl.append_attribute("standalone") = "no";
+
+		tabla = documento.append_child("tabla");
+
+		pugi::xml_node defi = tabla.append_child("definicion");
+		pugi::xml_node registros = tabla.append_child("registros");
+		documento.save_file("file.xml");
+	}
+	if (result)
+	{
+		std::cout << "Archivo cargado" << std::endl;
+		tabla = documento.first_child();
+		pugi::xml_node defi = tabla.child("definicion");
+		pugi::xml_attribute name;
+		for (pugi::xml_node columna = defi.first_child(); columna; columna = columna.next_sibling())
+		{
+			name = columna.attribute("nombre");
+			definicion.push_back((char*)name.value());
+		}
+	}
+}
+
 Tabla::~Tabla()
 {
 	documento.save_file("file.xml");
@@ -251,7 +284,7 @@ bool Tabla::existColumns(std::vector<std::string> nombre_atributos)
 		return true;
 	return false;
 }
-
+/*Muestra en pantalla las columnas*/
 void Tabla::desplegarListaColumnas()
 {
 	if (definicion.size() == 0)
