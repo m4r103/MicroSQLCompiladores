@@ -17,21 +17,22 @@ struct _registro
 
 typedef _registro str_registro;
 
-typedef std::vector<str_registro> register_collection;
 
 class Tabla
 {
 private:
 	pugi::xml_document documento;
 	pugi::xml_node tabla;
+	std::string nombreTabla;
+	std::string nombreArchivo;
 	std::vector<std::string> definicion;
 	void limpiaBuffer();
 	bool existColumns(std::vector<std::string> nombre_atributos);
 	std::vector<std::string> getAttributeNames(str_registro busqueda);
 public:
-	Tabla();
 	/*Crea una nueva tabla con un nombre especificado*/
 	Tabla(std::string nombre);
+	Tabla();
 	~Tabla();
 	/*Agrega una nueva columna*/
 	void addColumna(std::string nombre, int size);
@@ -57,5 +58,7 @@ public:
 	/*Obtiene los nombres de las columnas como un std::vector<std::string>*/
 	std::vector<std::string> getColumnas();
 	bool save();
+	/*Obtiene el nombre de la tabla como un std::string*/
+	std::string getTableName();
 };
 #endif //TABLA_H
