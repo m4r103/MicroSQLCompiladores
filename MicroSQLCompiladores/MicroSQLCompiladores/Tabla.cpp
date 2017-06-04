@@ -8,6 +8,7 @@ void Tabla::limpiaBuffer()
 	int c;
 	while ((c = getchar()) != '\n' && c != EOF);
 }
+
 Tabla::Tabla()
 {
 	pugi::xml_parse_result result = documento.load_file("file.xml");
@@ -42,16 +43,12 @@ Tabla::~Tabla()
 {
 	documento.save_file("file.xml");
 }
-void Tabla::addColumna()
+/*Agrega una nueva columna*/
+void Tabla::addColumna(std::string nombre, int size)
 {
-	std::string nombre;
-	int size;
-	std::cout << "Introduce nombre:";
-	std::cin >> nombre;
-	std::cout << "Introduce tamanio:";
-	std::cin >> size;
+
 	for (unsigned i = 0; i < definicion.size(); i++)
-		if (strcmp(definicion[i].c_str(), nombre.c_str()) == 0){
+		if (nombre == definicion[i]) {
 			std::cout << "Columna existente " << definicion[i] << std::endl;
 			return;
 		}
@@ -74,24 +71,26 @@ void Tabla::addColumna()
 	csize.set_value(size);
 	save();
 }
+/*Obtiene el numero de columnas*/
 int Tabla::getNumeroColumnas()
 {
 	return definicion.size();
 }
-bool Tabla::removeColumna(char * nombre)
+/*Elimina la columna especificada*/
+bool Tabla::removeColumna(std::string nombre)
 {
 	pugi::xml_node defi = tabla.first_child();
 	pugi::xml_attribute name;
 	int i = 0;
 	for (auto x : definicion)
 	{
-		if (strcmp(x.c_str(), nombre) == 0)
+		if (x == nombre)
 		{
 			definicion.erase(definicion.begin() + i);
 			for (pugi::xml_node columna = defi.first_child(); columna; columna = columna.next_sibling())
 			{
 				name = columna.attribute("nombre");
-				if (strcmp(nombre, name.value()) == 0)
+				if (nombre == name.value())
 				{
 					defi.remove_child(columna);
 					save();
@@ -103,86 +102,156 @@ bool Tabla::removeColumna(char * nombre)
 	}
 	return false;
 }
-void Tabla::insertarRegistro()
+/*Obtiene los nombres de las columnas como un std::vector<std::string>*/
+std::vector<std::string> Tabla::getColumnas()
 {
-	if (definicion.size() != 0)
-	{
-		int i = 0;
-		char dest[10];
-		pugi::xml_node registros = tabla.child("registros");
-		for (pugi::xml_node registro = registros.first_child(); registro; registro = registro.next_sibling())
-			i++;
-		pugi::xml_node registro = registros.append_child("registro");
-		std::string valor;
-		for (auto x : definicion)
-		{
-			//limpiaBuffer();
-			std::cout << "Inserta " << x << ":" << std::endl;
-			std::cin >> valor;
-			limpiaBuffer();
-			pugi::xml_attribute atributo = registro.append_attribute(x.c_str());
-			atributo.set_value(valor.c_str());
-		}
-		i++;
-		std::sprintf(dest, "%d", i);
-		registro.append_child(pugi::node_pcdata).set_value(dest);
-		save();
-	}else
-		std::cout << "No hay atributos para generar un registro";
+	return definicion;
 }
-bool Tabla::modificiarRegistro(int id, char * columna)
+
+/*Inserta un registro con los valores de str_registro.atributo_valor donde las columnas
+son las llaves del std::map y los valores el valor*/
+bool Tabla::insertarRegistro(str_registro insertar)
 {
-	bool existe = false;
+	if (!existColumns(getAttributeNames(insertar)))
+	{
+		std::cout << "Error de columnas";
+		return false;
+	}
+	if (definicion.size() == 0)
+	{
+		std::cout << "No existen columnas";
+		return false;
+	}
+	int i = 0;
+	/*Buscamos el ultimo registro y su id*/
+	for (pugi::xml_node registro : tabla.children("registros"))
+	{
+		int lastReg = std::atoi(registro.child_value());
+		if (i < lastReg)
+			i = lastReg;
+	}
+	pugi::xml_node registros = tabla.child("registros");
+	/*Creamos el nodo */
+	pugi::xml_node registro = registros.append_child("registro");
 	for (auto x : definicion)
 	{
-		if (strcmp(x.c_str(), columna) == 0)
-			existe = true;
+		/*Cargamos las columnas al nodod como atributos*/
+		pugi::xml_attribute atributo = registro.append_attribute(x.c_str());
 	}
-	pugi::xml_node registros = tabla.child("registros");
-	for (pugi::xml_node registro = registros.first_child(); registro; registro = registro.next_sibling())
-	{
-		if (atoi(registro.child_value()) == id)
-		{
-			std::string valor;
-			limpiaBuffer();
-			std::cout << "Introduce " << columna << ":" << std::endl;
-			std::cin >> valor;
-			limpiaBuffer();
-			registro.attribute(columna).set_value(valor.c_str());
-			save();
-			return existe;
-		}
-	}
-	return existe;
+	/*Cargamos los valores en las columnas deseadas*/
+	for(auto x: insertar.atributo_valor)
+		registro.attribute(x.first.c_str()).set_value(x.second.c_str());
+	/*Escribismos el ID*/
+	char dest[10];
+	i++;
+	std::sprintf(dest, "%d", i);
+	registro.append_child(pugi::node_pcdata).set_value(dest);
+	/*Guardamos el xml*/
+	save();
+	return true;
 }
-bool Tabla::removeRegistro(int id)
+/*Modifica el xml con los valores de str_registro.atributo_valor donde el id sea igual a str_registro.id*/
+bool Tabla::modificiarRegistro(str_registro busqueda)
 {
-	pugi::xml_node registros = tabla.child("registros");
-	for (pugi::xml_node registro = registros.first_child(); registro; registro = registro.next_sibling())
+	if (!existColumns(getAttributeNames(busqueda)))
+		return false;
+	for (pugi::xml_node registro : tabla.child("registros"))
 	{
-		if (atoi(registro.child_value()) == id)
+		if (std::atoi(registro.child_value()) == busqueda.id)
+			for (auto x : busqueda.atributo_valor)
+			{
+				registro.attribute(x.first.c_str()).set_value(x.second.c_str());
+			}
+	}
+	return true;
+}
+
+/*Elimina del xml todos los registros que cumplan con las caracteristicas del str_registro especificado*/
+bool Tabla::removeRegistro(str_registro busqueda)
+{
+	if (!existColumns(getAttributeNames(busqueda)))
+		return false;
+	std::vector<str_registro> aux = consultarRegistro(busqueda);
+	if (aux.size() <= 0)
+		return false;
+	pugi::xml_node registros = tabla.child("registros");
+	for (auto x : aux)
+	{
+		for (pugi::xml_node registro = registros.first_child(); registro; registro = registro.next_sibling())
 		{
-			registros.remove_child(registro);
-			save();
-			return true;
+			if (std::atoi(registro.child_value()) == x.id)
+			{
+				registros.remove_child(registro);
+				save();
+				break;
+			}
 		}
 	}
+	return true;
+}
+
+/*Devuelve los registros que cumplen con las caracteristicas
+del str_registro usado*/
+std::vector<str_registro> Tabla::consultarRegistro(str_registro busqueda)
+{
+	std::vector<str_registro> aux = leerRegistros();
+	std::vector<str_registro> ret;
+
+	for (str_registro registro : aux)
+	{
+		auto y = registro.atributo_valor;
+		for (auto x : busqueda.atributo_valor)
+		{
+			if (y.at(x.first) != x.second)
+				continue;
+		}
+		ret.push_back(registro);
+	siguiente_registro:
+	}
+	return ret;
+}
+
+/*Trae todos los registros del xml*/
+std::vector<str_registro> Tabla::leerRegistros()
+{
+	std::vector<str_registro> ret;
+
+	str_registro aux;
+	for (pugi::xml_node registro : tabla.children("registros"))
+	{
+		aux.atributo_valor.clear();
+		for (pugi::xml_attribute attr : registro.attributes())
+		{
+			aux.atributo_valor.insert(std::pair<std::string, std::string>(attr.name(), attr.value()));
+		}
+		aux.id = std::atoi(registro.child_value());
+		ret.push_back(aux);
+	}
+	return ret;
+}
+/*Extrae los nombres de los atribuso de un registro y los devuelve como un vector de cadenas*/
+std::vector<std::string> Tabla::getAttributeNames(str_registro busqueda)
+{
+	std::vector<std::string> ret;
+	for (auto x : busqueda.atributo_valor)
+		ret.push_back(x.first);
+	return ret;
+}
+/*Verifica la existencia de los atributos*/
+bool Tabla::existColumns(std::vector<std::string> nombre_atributos)
+{
+	if (nombre_atributos.size() <= 0)
+		return false;
+	int i = 0;
+	for (auto x : nombre_atributos)
+		for (auto y : definicion)
+			if (x == y)
+				i++;
+	if (i == nombre_atributos.size())
+		return true;
 	return false;
 }
-void Tabla::consultarRegistro(int id)
-{
-	pugi::xml_node registros = tabla.child("registros");
-	for (pugi::xml_node registro = registros.first_child(); registro; registro = registro.next_sibling())
-	{
-		if (atoi(registro.child_value()) == id)
-		{
-			for (auto x : definicion)
-				std::cout << x << ": " << registro.attribute(x.c_str()).value() << " ";
-			return;
-		}
-	}
-	std::cout << "No se encontro el registro" << std::endl;
-}
+
 void Tabla::desplegarListaColumnas()
 {
 	if (definicion.size() == 0)
@@ -193,20 +262,7 @@ void Tabla::desplegarListaColumnas()
 	}
 
 }
-void Tabla::desplegarRegistros()
-{
-	int i = 0;
-	pugi::xml_node registros = tabla.child("registros");
-	for (pugi::xml_node registro = registros.first_child(); registro; registro = registro.next_sibling())
-	{
-		std::cout << "Numero de registro: " << registro.child_value() << "\n";
-		for (auto x : definicion)
-			std::cout << x << ": " << registro.attribute(x.c_str()).value() << "\n";
-		std::cout << std::endl;
-		i++;
-	}
-	std::cout << i << " Registros mostrados" << std::endl;
-}
+
 bool Tabla::save()
 {
 	return documento.save_file("file.xml");
