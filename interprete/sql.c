@@ -130,3 +130,16 @@ int createTable(){
     }
     
 }
+int insert(){
+    Datum d1;
+    d1 = pop();
+    printf("Insertando en tabla %s\n", d1.str);
+    printf("Valores:\n");
+    Column *campos, *valores;
+    campos = (Column *)*pc++;
+    valores = (Column *)*pc++;
+    Column *c, *v;
+    for(c = campos, v = valores ; c!=0 && v!=0; c = c->next, v = v->next){
+        printf("%s --- %s\n", c->val->nombre, v->val->nombre);
+    }
+}

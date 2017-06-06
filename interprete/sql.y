@@ -22,8 +22,13 @@
 %token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INDEF
 
 %type <columnlist> create_col_list 
+%type <columnlist> column_list
+%type <columnlist> opt_col_names
+%type <columnlist> insert_vals
+%type <columnlist> insert_vals_list
 %type <columnval> create_definition
 %type <columnval> data_type
+%type <columnval> expr
 
 %token <strval> USERVAR
 %left OR
@@ -43,30 +48,30 @@ stmt_list:
             | stmt_list stmt ';' {code(STOP); return 1;}
             ;
 
-expr:         NAME 
-            | NAME '.' NAME
-            | USERVAR
-            | '"' NAME '"'  /*String*/
-            | INTNUM
-            | APPROXNUM
-            | BOOL
+expr:         NAME {;}
+            | NAME '.' NAME {;}
+            | USERVAR {;}
+            | '"' NAME '"' {$$ = createColumn($2->str, 0, 0);} /*String*/
+            | INTNUM {;}
+            | APPROXNUM {;}
+            | BOOL {;}
             ;
 
-expr:       | expr '+' expr
-            | expr '-' expr
-            | expr '*' expr
-            | expr '/' expr
-            | expr '%' expr
-            | expr MOD expr
-            | '-' expr %prec UMINUS
-            | expr ANDOP expr
-            | expr OR expr
-            | expr XOR expr
-            | expr '|' expr
-            | expr '&' expr
-            | expr '^' expr
-            | NOT expr
-            | '!' expr
+expr:         expr '+' expr {$$ = $1;}
+            | expr '-' expr {$$ = $1;}
+            | expr '*' expr {$$ = $1;}
+            | expr '/' expr {$$ = $1;}
+            | expr '%' expr {$$ = $1;}
+            | expr MOD expr {$$ = $1;}
+            | '-' expr %prec UMINUS {$$ = $2;}
+            | expr ANDOP expr {$$ = $1;}
+            | expr OR expr {$$ = $1;}
+            | expr XOR expr {$$ = $1;}
+            | expr '|' expr {$$ = $1;}
+            | expr '&' expr {$$ = $1;}
+            | expr '^' expr {$$ = $1;}
+            | NOT expr {$$ = $2;}
+            | '!' expr {$$ = $2;}
             ;
 /* Create database */
 stmt:         create_database_stmt {;}
@@ -95,8 +100,8 @@ create_definition:  PRIMARY KEY '(' column_list ')' {;}
             |       INDEX '(' column_list ')' {;}
             ;
 
-column_list: NAME {;}
-            | column_list ',' NAME {;}
+column_list: NAME {$$ = columnlist(createColumn($1->str, 0, 0), 0);}
+            | column_list ',' NAME {$$ = columnlist(createColumn($3->str, 0, 0), $1);}
             ;
 
 create_definition:  NAME data_type column_atts {$2->nombre = $1->str; $$ = $2;}
@@ -113,17 +118,17 @@ data_type:  VARCHAR '(' INTNUM ')' {$$ = createColumn(0, $1->type, $3->intval);}
 stmt:         insert_stmt {;}
             ;
 
-insert_stmt:  INSERT INTO NAME {printf("Insertando en %s\n", $3);}opt_col_names VALUES insert_vals_list
+insert_stmt:  INSERT INTO NAME opt_col_names VALUES insert_vals_list {code3(constpush, (Inst)$3, insert); code2((Inst)$4, (Inst)$6);}
             ;
 
-opt_col_names: /* Vacio */
-            | '(' column_list ')' {;}
+opt_col_names: /* Vacio */ {;}
+            | '(' column_list ')' {$$ = $2;}
             ;
-insert_vals_list: '(' insert_vals ')' {;}
+insert_vals_list: '(' insert_vals ')' {$$ = $2;}
             | insert_vals_list ',' '(' insert_vals ')' {;}
             ;
-insert_vals: expr {;}
-            | insert_vals ',' expr {;}
+insert_vals: expr {$$ = columnlist($1, 0);}
+            | insert_vals ',' expr {$$ = columnlist($3, $1);}
             ;
 %%
 
