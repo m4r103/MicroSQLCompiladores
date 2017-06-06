@@ -9,9 +9,13 @@
 
 struct _registro
 {
-	_registro() {};
+	/*Registro Vacio*/
+	_registro() {}
+	/*Recibe dos str::vector<std::string> uno para el nombre de atributos y el segundo
+	para los valores de los atributos*/
+	_registro(std::vector<std::string> attrib, std::vector<std::string> valor) { generateRegistro(attrib, valor); }
 	/*La llave es el atributo y el valor el valor*/
-	std::map<std::string, std::string> atributo_valor; 
+	std::map<std::string, std::string> atributo_valor;
 	/*Id dentro del xml*/
 	int id;
 	void generateRegistro(std::vector<std::string> attrib, std::vector<std::string> valor)
