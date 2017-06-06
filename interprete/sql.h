@@ -4,11 +4,14 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdio.h>
 
 typedef int (*Inst)(void);
-typedef struct Symbol   Symbol;
-typedef union Datum     Datum;
-typedef union Symval    Symval;
+typedef struct  Symbol      Symbol;
+typedef union   Datum       Datum;
+typedef union   Symval      Symval;
+typedef struct  Column      Column;
+typedef struct  Columnval   Columnval;
 
 union Symval{               /* Valor de un simbolo */
     int intval;		/* Entero */
@@ -24,9 +27,18 @@ struct Symbol { /* entrada de la tabla de símbolos */
 };
 
 union Datum{
-    double doubleval;
+    int intval;
     char *str;
     Symbol *sym;
+};
+struct Column{      /* Columnas de una tabla */
+    Columnval *val;
+    Column *next;
+};
+struct Columnval{   /* Columna de una tabla */
+    char *nombre;
+    short type;     /* VARCHAR */
+    int len;        /* Longitud del tipo */
 };
 
 /*********** Yacc *****************/
@@ -66,5 +78,10 @@ int   constpush();
 int   varpush();
 Inst  *code(Inst);
 void  execute(Inst *);
+
+int createDatabase();
+Column *columnlist(Columnval *, Column *);
+Columnval *createColumn(char *, short, int);
+int createTable();
 
 #endif

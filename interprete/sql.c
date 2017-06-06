@@ -96,3 +96,37 @@ void execute(Inst *p){
         (*(*pc++))();
     }
 }
+int createDatabase(){
+    Datum d1;
+    d1 = pop();
+    printf("Creando base de datos %s\n", d1.str);
+}
+Column *columnlist(Columnval *columna, Column *list){
+    Column *col;
+    col = (Column *)malloc(sizeof(Column));
+    col->val = columna;
+    col->next = list;
+    return col;
+}
+Columnval *createColumn(char *nombre, short type, int len){
+    Columnval *columna;
+    columna = (Columnval *)malloc(sizeof(Columnval));
+    columna->nombre = nombre;
+    columna->type   = type;
+    columna->len    = len;
+    return columna;
+}
+int createTable(){
+    Datum d1;
+    d1 = pop();
+    printf("Creando tabla %s\n", d1.str);
+    
+    printf("Parametros:\n");
+    Column *list;
+    list = (Column *)*pc++;
+    Column *itera;
+    for(itera = list; itera!=0; itera = itera->next){
+        printf("%s --- %d\n", itera->val->nombre, itera->val->len);
+    }
+    
+}

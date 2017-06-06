@@ -10,13 +10,20 @@
     int subtok;
     Symbol *sym;
     Inst *inst;
+    Datum *const_val;
+    Column *columnlist;
+    Columnval *columnval;
 }
 
-%token <strval> NAME
-%token <intval> INTNUM
-%token <intval> BOOL
+%token <const_val> NAME
+%token <const_val> INTNUM
+%token <const_val> BOOL
 %token <floatval> APPROXNUM
 %token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INDEF
+
+%type <columnlist> create_col_list 
+%type <columnval> create_definition
+%type <columnval> data_type
 
 %token <strval> USERVAR
 %left OR
@@ -31,14 +38,15 @@
 %left nonassoc UMINUS
 %start stmt_list
 %% 
-stmt_list:    stmt ';'
-            | stmt_list stmt ';'
+stmt_list:    
+            | stmt ';' {code(STOP); return 1;}
+            | stmt_list stmt ';' {code(STOP); return 1;}
             ;
 
 expr:         NAME 
             | NAME '.' NAME
             | USERVAR
-            | '"' NAME '"'  {printf("%s\n", $2);}/*String*/
+            | '"' NAME '"'  /*String*/
             | INTNUM
             | APPROXNUM
             | BOOL
@@ -64,22 +72,22 @@ expr:       | expr '+' expr
 stmt:         create_database_stmt {;}
             ;
 
-create_database_stmt: CREATE DATABASE NAME {printf("Creando bd: %s\n", $3);}
-            |         CREATE SCHEMA NAME {;}
+create_database_stmt: CREATE DATABASE NAME {code3(constpush, (Inst)$3, createDatabase);}
+            |         CREATE SCHEMA NAME {code3(constpush, (Inst)$3, createDatabase);}
             ;
 
 /* Create table */
 stmt:         create_table_stmt {;}
             ;
 
-create_table_stmt:  CREATE TABLE NAME {printf("Creando tabla %s\n", $3);} '(' create_col_list ')'
-                 ;
+create_table_stmt:  CREATE TABLE NAME '(' create_col_list ')' {code3(constpush, (Inst)$3, createTable); code((Inst)$5);}
+            ;
             
 create_table_stmt:  CREATE TABLE NAME '.' NAME '(' create_col_list ')' {;}
             ;
 /* Lista de columnas */
-create_col_list:    create_definition {;}
-            |       create_col_list ',' create_definition {;}
+create_col_list:    create_definition {$$ = columnlist($1, 0);}
+            |       create_col_list ',' create_definition {$$ = columnlist($3, $1);}
             ;
 
 create_definition:  PRIMARY KEY '(' column_list ')' {;}
@@ -91,15 +99,15 @@ column_list: NAME {;}
             | column_list ',' NAME {;}
             ;
 
-create_definition:  NAME {printf("Creando columna %s, ", $1);} data_type column_atts {;}
+create_definition:  NAME data_type column_atts {$2->nombre = $1->str; $$ = $2;}
             ;
-column_atts:    /* Vacion */ {}
+column_atts:    /* Vacio */ {}
             | column_atts NOT NULLX {;}
             | column_atts NULLX     {;}
             | column_atts AUTO_INCREMENT {;}
             | column_atts PRIMARY KEY
             ;
-data_type:  VARCHAR '(' INTNUM ')' {printf("Tam %d\n", $3);}
+data_type:  VARCHAR '(' INTNUM ')' {$$ = createColumn(0, $1->type, $3->intval);}
 
 /* Insertar */
 stmt:         insert_stmt {;}
@@ -113,6 +121,7 @@ opt_col_names: /* Vacio */
             ;
 insert_vals_list: '(' insert_vals ')' {;}
             | insert_vals_list ',' '(' insert_vals ')' {;}
+            ;
 insert_vals: expr {;}
             | insert_vals ',' expr {;}
             ;
@@ -133,10 +142,10 @@ void main (int argc, char *argv[]){
     init();
     setjmp(begin);
     signal(SIGFPE, fpecatch);
-    initcode();
-    yyparse();
-  	//for(initcode(); yyparse (); initcode())
-    //    execute(progbase);
+    //initcode();
+    //yyparse();
+  	for(initcode(); yyparse (); initcode())
+        execute(progbase);
 }
 
 void execerror(char *s, char *t){
@@ -157,7 +166,8 @@ int yylex (){
     		return 0;
   	if (isdigit (c)) {
       		ungetc (c, stdin);
-      		scanf ("%d", &(yylval.intval));
+            yylval.const_val = (Datum *)malloc(sizeof(Datum));
+      		scanf ("%d", &(yylval.const_val->intval));
 	      return INTNUM;
     	}
 	if(isalpha(c)){
@@ -169,9 +179,10 @@ int yylex (){
 		ungetc(c, stdin);
 		*p='\0';
 		if((s=lookup(sbuf))==(Symbol *)NULL){
+            yylval.const_val = (Datum *)malloc(sizeof(Datum));
             char *temp = (char *)malloc(strlen(sbuf));
             memcpy(temp, sbuf, strlen(sbuf));
-		    yylval.strval = temp; 
+		    yylval.const_val->str = temp; 
 			return NAME;
         }
 		yylval.sym=s;   
