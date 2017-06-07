@@ -46,60 +46,62 @@ extern int yydebug;
   enum yytokentype
   {
     NAME = 258,
-    INTNUM = 259,
-    BOOL = 260,
-    APPROXNUM = 261,
-    AUTO_INCREMENT = 262,
-    CREATE = 263,
-    DATABASE = 264,
-    INDEX = 265,
-    INSERT = 266,
-    INTO = 267,
-    VALUES = 268,
-    PRIMARY = 269,
-    KEY = 270,
-    NULLX = 271,
-    SCHEMA = 272,
-    TABLE = 273,
-    VARCHAR = 274,
-    INDEF = 275,
-    USERVAR = 276,
-    OR = 277,
-    XOR = 278,
-    ANDOP = 279,
-    NOT = 280,
-    MOD = 281,
-    nonassoc = 282,
-    UMINUS = 283
+    STRING = 259,
+    INTNUM = 260,
+    BOOL = 261,
+    APPROXNUM = 262,
+    AUTO_INCREMENT = 263,
+    CREATE = 264,
+    DATABASE = 265,
+    INDEX = 266,
+    INSERT = 267,
+    INTO = 268,
+    VALUES = 269,
+    PRIMARY = 270,
+    KEY = 271,
+    NULLX = 272,
+    SCHEMA = 273,
+    TABLE = 274,
+    VARCHAR = 275,
+    INDEF = 276,
+    USERVAR = 277,
+    OR = 278,
+    XOR = 279,
+    ANDOP = 280,
+    NOT = 281,
+    MOD = 282,
+    nonassoc = 283,
+    UMINUS = 284
   };
 #endif
 /* Tokens.  */
 #define NAME 258
-#define INTNUM 259
-#define BOOL 260
-#define APPROXNUM 261
-#define AUTO_INCREMENT 262
-#define CREATE 263
-#define DATABASE 264
-#define INDEX 265
-#define INSERT 266
-#define INTO 267
-#define VALUES 268
-#define PRIMARY 269
-#define KEY 270
-#define NULLX 271
-#define SCHEMA 272
-#define TABLE 273
-#define VARCHAR 274
-#define INDEF 275
-#define USERVAR 276
-#define OR 277
-#define XOR 278
-#define ANDOP 279
-#define NOT 280
-#define MOD 281
-#define nonassoc 282
-#define UMINUS 283
+#define STRING 259
+#define INTNUM 260
+#define BOOL 261
+#define APPROXNUM 262
+#define AUTO_INCREMENT 263
+#define CREATE 264
+#define DATABASE 265
+#define INDEX 266
+#define INSERT 267
+#define INTO 268
+#define VALUES 269
+#define PRIMARY 270
+#define KEY 271
+#define NULLX 272
+#define SCHEMA 273
+#define TABLE 274
+#define VARCHAR 275
+#define INDEF 276
+#define USERVAR 277
+#define OR 278
+#define XOR 279
+#define ANDOP 280
+#define NOT 281
+#define MOD 282
+#define nonassoc 283
+#define UMINUS 284
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -118,7 +120,7 @@ union YYSTYPE
     Column *columnlist;
     Columnval *columnval;
 
-#line 122 "y.tab.h" /* yacc.c:1909  */
+#line 124 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

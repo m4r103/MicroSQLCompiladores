@@ -16,6 +16,7 @@
 }
 
 %token <const_val> NAME
+%token <const_val> STRING
 %token <const_val> INTNUM
 %token <const_val> BOOL
 %token <floatval> APPROXNUM
@@ -51,7 +52,7 @@ stmt_list:
 expr:         NAME {;}
             | NAME '.' NAME {;}
             | USERVAR {;}
-            | '"' NAME '"' {$$ = createColumn($2->str, 0, 0);} /*String*/
+            | STRING {$$ = createColumn($1->str, 0, 0);} /*String*/
             | INTNUM {;}
             | APPROXNUM {;}
             | BOOL {;}
@@ -170,11 +171,24 @@ int yylex (){
  	if (c == EOF)                            
     		return 0;
   	if (isdigit (c)) {
-      		ungetc (c, stdin);
-            yylval.const_val = (Datum *)malloc(sizeof(Datum));
-      		scanf ("%d", &(yylval.const_val->intval));
-	      return INTNUM;
-    	}
+        ungetc (c, stdin);
+        yylval.const_val = (Datum *)malloc(sizeof(Datum)); 
+        scanf ("%d", &(yylval.const_val->intval));
+	    return INTNUM;
+    }
+    if(c == '\"'){
+		char sbuf[200], *p=sbuf;
+		while ((c=getchar())!=EOF && c != '\"'){
+			*p++=c;
+        }
+        if(c == EOF) return 0;
+        *p = 0;
+        yylval.const_val = (Datum *)malloc(sizeof(Datum));
+        char *temp = (char *)malloc(strlen(sbuf));
+        memcpy(temp, sbuf, strlen(sbuf));
+        yylval.const_val->str = temp; 
+        return STRING;
+    }
 	if(isalpha(c)){
 		Symbol *s;
 		char sbuf[200], *p=sbuf;
