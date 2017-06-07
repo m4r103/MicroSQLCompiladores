@@ -85,5 +85,6 @@ Columnval *createColumn(char *, short, int);
 int createTable();
 int insert();
 int selectsql();
+int deletesql();
 
 #endif

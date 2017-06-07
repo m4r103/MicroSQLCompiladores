@@ -71,14 +71,15 @@ extern int yydebug;
     SELECT = 281,
     FROM = 282,
     WHERE = 283,
-    USERVAR = 284,
-    OR = 285,
-    XOR = 286,
-    ANDOP = 287,
-    NOT = 288,
-    MOD = 289,
-    nonassoc = 290,
-    UMINUS = 291
+    DELETE = 284,
+    USERVAR = 285,
+    OR = 286,
+    XOR = 287,
+    ANDOP = 288,
+    NOT = 289,
+    MOD = 290,
+    nonassoc = 291,
+    UMINUS = 292
   };
 #endif
 /* Tokens.  */
@@ -108,14 +109,15 @@ extern int yydebug;
 #define SELECT 281
 #define FROM 282
 #define WHERE 283
-#define USERVAR 284
-#define OR 285
-#define XOR 286
-#define ANDOP 287
-#define NOT 288
-#define MOD 289
-#define nonassoc 290
-#define UMINUS 291
+#define DELETE 284
+#define USERVAR 285
+#define OR 286
+#define XOR 287
+#define ANDOP 288
+#define NOT 289
+#define MOD 290
+#define nonassoc 291
+#define UMINUS 292
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -134,7 +136,7 @@ union YYSTYPE
     Column *columnlist;
     Columnval *columnval;
 
-#line 138 "y.tab.h" /* yacc.c:1909  */
+#line 140 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

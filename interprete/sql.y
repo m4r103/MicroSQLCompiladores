@@ -20,7 +20,7 @@
 %token <const_val> INTNUM
 %token <const_val> BOOL
 %token <floatval> APPROXNUM
-%token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INDEF ASC ORDER BY DESC SELECT FROM WHERE
+%token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INDEF ASC ORDER BY DESC SELECT FROM WHERE DELETE
 
 %type <columnlist> create_col_list 
 %type <columnlist> column_list
@@ -163,6 +163,12 @@ select_expr: expr {$$ = $1;}
 table_references: NAME {code2(constpush, (Inst)$1);}
                 | NAME '.' NAME {;}
                 ;
+
+/* Delete */
+stmt:         delete_stmt {;}
+            ;
+delete_stmt:  DELETE FROM table_references opt_where opt_orderby {code(deletesql);}
+            ;
 %%
 
 #include <stdio.h>

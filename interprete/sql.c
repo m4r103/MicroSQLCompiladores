@@ -28,6 +28,7 @@ static struct {
     "select",           SELECT,
     "from",             FROM,
     "where",            WHERE,
+    "delete",           DELETE,
     0,                  0,
 };
 
@@ -164,4 +165,9 @@ int selectsql(){
             printf("%s\n", c->val->nombre);
         }
     }
+}
+int deletesql(){
+    Datum d1;
+    d1 = pop();
+    printf("Eliminando de tabla %s\n", d1.str);
 }
