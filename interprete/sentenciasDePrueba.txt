@@ -1,0 +1,3 @@
+create database escom;
+create table alumno (nombre varchar(16), apellido varchar(16));
+insert into alumno (nombre, apellido) values("Isaac", "Rodriguez");
