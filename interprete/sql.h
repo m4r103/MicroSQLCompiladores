@@ -39,6 +39,7 @@ struct Columnval{   /* Columna de una tabla */
     char *nombre;
     short type;     /* VARCHAR */
     int len;        /* Longitud del tipo */
+    Datum *val;
 };
 
 /*********** Yacc *****************/
@@ -81,10 +82,11 @@ void  execute(Inst *);
 
 int createDatabase();
 Column *columnlist(Columnval *, Column *);
-Columnval *createColumn(char *, short, int);
+Columnval *createColumn(char *, short, int, Datum *);
 int createTable();
 int insert();
 int selectsql();
 int deletesql();
+int updatesql();
 
 #endif

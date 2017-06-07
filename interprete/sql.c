@@ -29,6 +29,8 @@ static struct {
     "from",             FROM,
     "where",            WHERE,
     "delete",           DELETE,
+    "update",           UPDATE,
+    "set",              SET,
     0,                  0,
 };
 
@@ -115,12 +117,13 @@ Column *columnlist(Columnval *columna, Column *list){
     col->next = list;
     return col;
 }
-Columnval *createColumn(char *nombre, short type, int len){
+Columnval *createColumn(char *nombre, short type, int len, Datum *val){
     Columnval *columna;
     columna = (Columnval *)malloc(sizeof(Columnval));
     columna->nombre = nombre;
     columna->type   = type;
     columna->len    = len;
+    columna->val    = val;
     return columna;
 }
 int createTable(){
@@ -147,7 +150,7 @@ int insert(){
     valores = (Column *)*pc++;
     Column *c, *v;
     for(c = campos, v = valores ; c!=0 && v!=0; c = c->next, v = v->next){
-        printf("%s --- %s\n", c->val->nombre, v->val->nombre);
+        printf("%s --- %s\n", c->val->nombre, v->val->val->str);
     }
 }
 int selectsql(){
@@ -170,4 +173,16 @@ int deletesql(){
     Datum d1;
     d1 = pop();
     printf("Eliminando de tabla %s\n", d1.str);
+}
+int updatesql(){
+    Datum d1;
+    d1 = pop();
+    printf("Actualizando tabla %s\n", d1.str);
+    printf("Campos:\n");
+    Column *campos;
+    campos = (Column *)*pc++;
+    Column *c;
+    for(c = campos; c!=0; c = c->next){
+        printf("%s = '%s'\n", c->val->nombre, c->val->val->str);
+    }
 }

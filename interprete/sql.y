@@ -20,7 +20,7 @@
 %token <const_val> INTNUM
 %token <const_val> BOOL
 %token <floatval> APPROXNUM
-%token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INDEF ASC ORDER BY DESC SELECT FROM WHERE DELETE
+%token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INDEF ASC ORDER BY DESC SELECT FROM WHERE DELETE UPDATE SET
 
 %type <columnlist> create_col_list 
 %type <columnlist> column_list
@@ -28,6 +28,7 @@
 %type <columnlist> insert_vals
 %type <columnlist> insert_vals_list
 %type <columnlist> select_expr_list
+%type <columnlist> update_asgn_list
 %type <columnval> create_definition
 %type <columnval> data_type
 %type <columnval> select_expr
@@ -51,10 +52,10 @@ stmt_list:
             | stmt_list stmt ';' {code(STOP); return 1;}
             ;
 
-expr:         NAME {$$ = createColumn($1->str, 0, 0);}
+expr:         NAME {$$ = createColumn($1->str, 0, 0, $1);}
             | NAME '.' NAME {;}
             | USERVAR {;}
-            | STRING {$$ = createColumn($1->str, 0, 0);} /*String*/
+            | STRING {$$ = createColumn(0, 0, 0, $1);} /*String*/
             | INTNUM {;}
             | APPROXNUM {;}
             | BOOL {;}
@@ -103,8 +104,8 @@ create_definition:  PRIMARY KEY '(' column_list ')' {;}
             |       INDEX '(' column_list ')' {;}
             ;
 
-column_list: NAME {$$ = columnlist(createColumn($1->str, 0, 0), 0);}
-            | column_list ',' NAME {$$ = columnlist(createColumn($3->str, 0, 0), $1);}
+column_list: NAME {$$ = columnlist(createColumn($1->str, 0, 0, $1), 0);}
+            | column_list ',' NAME {$$ = columnlist(createColumn($3->str, 0, 0, $3), $1);}
             ;
 
 create_definition:  NAME data_type column_atts {$2->nombre = $1->str; $$ = $2;}
@@ -115,7 +116,7 @@ column_atts:    /* Vacio */ {}
             | column_atts AUTO_INCREMENT {;}
             | column_atts PRIMARY KEY
             ;
-data_type:  VARCHAR '(' INTNUM ')' {$$ = createColumn(0, $1->type, $3->intval);}
+data_type:  VARCHAR '(' INTNUM ')' {$$ = createColumn(0, $1->type, $3->intval, 0);}
 
 /* Insertar */
 stmt:         insert_stmt {;}
@@ -169,6 +170,15 @@ stmt:         delete_stmt {;}
             ;
 delete_stmt:  DELETE FROM table_references opt_where opt_orderby {code(deletesql);}
             ;
+
+/* UPDATE */
+stmt:         update_stmt {;}
+            ;
+update_stmt:  UPDATE table_references SET update_asgn_list opt_where opt_orderby {code2(updatesql, (Inst)$4);}
+            ;
+update_asgn_list:   NAME '=' expr {$3->nombre = $1->str; $$ = columnlist($3, 0);}
+                  | update_asgn_list ',' NAME '=' expr {$5->nombre = $3->str; $$ = columnlist($5, $1);}
+                  ;
 %%
 
 #include <stdio.h>
