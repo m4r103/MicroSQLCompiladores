@@ -1,3 +1,5 @@
 create database escom;
 create table alumno (nombre varchar(16), apellido varchar(16));
 insert into alumno (nombre, apellido, correo) values("Isaac", "Rodriguez", "isaac@gmail.com");
+select * from alumno;
+select nombre, apellido, correo from alumno;

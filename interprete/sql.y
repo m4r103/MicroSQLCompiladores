@@ -20,15 +20,17 @@
 %token <const_val> INTNUM
 %token <const_val> BOOL
 %token <floatval> APPROXNUM
-%token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INDEF
+%token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INDEF ASC ORDER BY DESC SELECT FROM WHERE
 
 %type <columnlist> create_col_list 
 %type <columnlist> column_list
 %type <columnlist> opt_col_names
 %type <columnlist> insert_vals
 %type <columnlist> insert_vals_list
+%type <columnlist> select_expr_list
 %type <columnval> create_definition
 %type <columnval> data_type
+%type <columnval> select_expr
 %type <columnval> expr
 
 %token <strval> USERVAR
@@ -49,7 +51,7 @@ stmt_list:
             | stmt_list stmt ';' {code(STOP); return 1;}
             ;
 
-expr:         NAME {;}
+expr:         NAME {$$ = createColumn($1->str, 0, 0);}
             | NAME '.' NAME {;}
             | USERVAR {;}
             | STRING {$$ = createColumn($1->str, 0, 0);} /*String*/
@@ -58,21 +60,21 @@ expr:         NAME {;}
             | BOOL {;}
             ;
 
-expr:         expr '+' expr {$$ = $1;}
-            | expr '-' expr {$$ = $1;}
-            | expr '*' expr {$$ = $1;}
-            | expr '/' expr {$$ = $1;}
-            | expr '%' expr {$$ = $1;}
-            | expr MOD expr {$$ = $1;}
-            | '-' expr %prec UMINUS {$$ = $2;}
-            | expr ANDOP expr {$$ = $1;}
-            | expr OR expr {$$ = $1;}
-            | expr XOR expr {$$ = $1;}
-            | expr '|' expr {$$ = $1;}
-            | expr '&' expr {$$ = $1;}
-            | expr '^' expr {$$ = $1;}
-            | NOT expr {$$ = $2;}
-            | '!' expr {$$ = $2;}
+expr:         expr '+' expr {;}
+            | expr '-' expr {;}
+            | expr '*' expr {;}
+            | expr '/' expr {;}
+            | expr '%' expr {;}
+            | expr MOD expr {;}
+            | '-' expr %prec UMINUS {;}
+            | expr ANDOP expr {;}
+            | expr OR expr {;}
+            | expr XOR expr {;}
+            | expr '|' expr {;}
+            | expr '&' expr {;}
+            | expr '^' expr {;}
+            | NOT expr {;}
+            | '!' expr {;}
             ;
 /* Create database */
 stmt:         create_database_stmt {;}
@@ -128,9 +130,39 @@ opt_col_names: /* Vacio */ {;}
 insert_vals_list: '(' insert_vals ')' {$$ = $2;}
             | insert_vals_list ',' '(' insert_vals ')' {;}
             ;
-insert_vals: expr {$$ = columnlist($1, 0);}
+insert_vals:  expr {$$ = columnlist($1, 0);}
             | insert_vals ',' expr {$$ = columnlist($3, $1);}
             ;
+
+/* Select */
+stmt: select_stmt {;}
+            ;
+
+select_stmt:  SELECT select_expr_list FROM table_references opt_where opt_orderby {code2(selectsql, (Inst)$2);}
+            ;
+
+opt_where: /* Vacio */
+            | WHERE expr {;}
+            ;
+opt_orderby: /* Vacio */
+            | ORDER BY groupby_list {;}
+            ;
+groupby_list:   expr opt_asc_desc {;}
+            | groupby_list ',' expr opt_asc_desc
+            ;
+opt_asc_desc: /* Vacio */
+            | ASC {;}
+            | DESC{;}
+            ;
+select_expr_list:  select_expr {$$ = columnlist($1, 0);}
+            | select_expr_list ',' select_expr {$$ = columnlist($3, $1);}
+            | '*' {$$ = 0;}   /* Select * from...  */
+            ;
+select_expr: expr {$$ = $1;}
+            ;
+table_references: NAME {code2(constpush, (Inst)$1);}
+                | NAME '.' NAME {;}
+                ;
 %%
 
 #include <stdio.h>

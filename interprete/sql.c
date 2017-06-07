@@ -18,11 +18,17 @@ static struct {
     "primary",          PRIMARY,
     "key",              KEY,
     "null",             NULLX,
-    "schema",            SCHEMA,
+    "schema",           SCHEMA,
     "table",            TABLE,
     "varchar",          VARCHAR,
-    "not",NOT,
-    0,      0,
+    "asc",              ASC,
+    "order",            ORDER,
+    "by",               BY,
+    "desc",             DESC,
+    "select",           SELECT,
+    "from",             FROM,
+    "where",            WHERE,
+    0,                  0,
 };
 
 int init(){
@@ -141,5 +147,21 @@ int insert(){
     Column *c, *v;
     for(c = campos, v = valores ; c!=0 && v!=0; c = c->next, v = v->next){
         printf("%s --- %s\n", c->val->nombre, v->val->nombre);
+    }
+}
+int selectsql(){
+    Datum d1;
+    d1 = pop();
+    printf("Consultando tabla %s\n", d1.str);
+    printf("Campos:\n");
+    Column *campos;
+    campos = (Column *)*pc++;
+    Column *c;
+    if(campos == 0){
+        printf("* (Todos)\n");
+    }else{
+        for(c = campos; c!=0; c = c->next){
+            printf("%s\n", c->val->nombre);
+        }
     }
 }
