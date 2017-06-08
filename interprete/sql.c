@@ -21,6 +21,7 @@ static struct {
     "schema",           SCHEMA,
     "table",            TABLE,
     "varchar",          VARCHAR,
+    "int",              INTEGER,
     "asc",              ASC,
     "order",            ORDER,
     "by",               BY,
@@ -136,7 +137,15 @@ int createTable(){
     list = (Column *)*pc++;
     Column *itera;
     for(itera = list; itera!=0; itera = itera->next){
-        printf("%s --- %d\n", itera->val->nombre, itera->val->len);
+        printf("%s ", itera->val->nombre);
+        switch(itera->val->type){
+            case VARCHAR:
+                printf("varchar (%d)\n", itera->val->len);
+                break;
+            case INTNUM:
+                printf("int\n");
+            break;
+        }
     }
     
 }
@@ -150,7 +159,14 @@ int insert(){
     valores = (Column *)*pc++;
     Column *c, *v;
     for(c = campos, v = valores ; c!=0 && v!=0; c = c->next, v = v->next){
-        printf("%s --- %s\n", c->val->nombre, v->val->val->str);
+        switch(v->val->type){
+            case STRING:
+                printf("%s = '%s'\n", c->val->nombre, v->val->val->str);
+                break;
+            case INTNUM:
+                printf("%s = %d\n", c->val->nombre, v->val->val->intval);
+                break;
+        }
     }
 }
 int selectsql(){
@@ -183,6 +199,13 @@ int updatesql(){
     campos = (Column *)*pc++;
     Column *c;
     for(c = campos; c!=0; c = c->next){
-        printf("%s = '%s'\n", c->val->nombre, c->val->val->str);
+        switch(c->val->type){
+            case STRING:
+                printf("%s = '%s'\n", c->val->nombre, c->val->val->str);
+                break;
+            case INTNUM:
+                printf("%s = %d\n", c->val->nombre, c->val->val->intval);
+                break;
+        }
     }
 }

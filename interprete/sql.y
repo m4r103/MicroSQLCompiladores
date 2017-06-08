@@ -20,7 +20,7 @@
 %token <const_val> INTNUM
 %token <const_val> BOOL
 %token <floatval> APPROXNUM
-%token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INDEF ASC ORDER BY DESC SELECT FROM WHERE DELETE UPDATE SET
+%token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INTEGER INDEF ASC ORDER BY DESC SELECT FROM WHERE DELETE UPDATE SET
 
 %type <columnlist> create_col_list 
 %type <columnlist> column_list
@@ -35,6 +35,7 @@
 %type <columnval> expr
 
 %token <strval> USERVAR
+%right '='
 %left OR
 %left XOR
 %left ANDOP
@@ -55,27 +56,14 @@ stmt_list:
 expr:         NAME {$$ = createColumn($1->str, 0, 0, $1);}
             | NAME '.' NAME {;}
             | USERVAR {;}
-            | STRING {$$ = createColumn(0, 0, 0, $1);} /*String*/
-            | INTNUM {;}
+            | STRING {$$ = createColumn(0, STRING, 0, $1);}
+            | INTNUM {$$ = createColumn(0, INTNUM, 0, $1);}
             | APPROXNUM {;}
             | BOOL {;}
             ;
 
-expr:         expr '+' expr {;}
-            | expr '-' expr {;}
-            | expr '*' expr {;}
-            | expr '/' expr {;}
-            | expr '%' expr {;}
-            | expr MOD expr {;}
-            | '-' expr %prec UMINUS {;}
-            | expr ANDOP expr {;}
-            | expr OR expr {;}
-            | expr XOR expr {;}
-            | expr '|' expr {;}
-            | expr '&' expr {;}
-            | expr '^' expr {;}
-            | NOT expr {;}
-            | '!' expr {;}
+expr:         expr '=' expr {;}
+            | expr '+' expr {;}
             ;
 /* Create database */
 stmt:         create_database_stmt {;}
@@ -116,7 +104,8 @@ column_atts:    /* Vacio */ {}
             | column_atts AUTO_INCREMENT {;}
             | column_atts PRIMARY KEY
             ;
-data_type:  VARCHAR '(' INTNUM ')' {$$ = createColumn(0, $1->type, $3->intval, 0);}
+data_type:    VARCHAR '(' INTNUM ')' {$$ = createColumn(0, VARCHAR, $3->intval, 0);}
+            | INTEGER {$$ = createColumn(0, INTNUM, 0, 0);}
 
 /* Insertar */
 stmt:         insert_stmt {;}
