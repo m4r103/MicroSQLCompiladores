@@ -2,6 +2,7 @@ create database escom;
 create table alumno (id int, nombre varchar(16), apellido varchar(16));
 insert into alumno (id, nombre, apellido, correo) values(1, "Isaac", "Rodriguez", "isaac@gmail.com");
 select * from alumno;
+select * from alumno where nombre = "prueba";
 select nombre, apellido, correo from alumno;
 delete from alumno;
 update alumno set nombre = "jose", apellido = "Ruiz", correo = "jruiz@gmail.com", id = 10;

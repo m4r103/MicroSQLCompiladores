@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include "sql.h"
+int follow(int, int, int);
 %}
 
 %union{
@@ -20,7 +21,7 @@
 %token <const_val> INTNUM
 %token <const_val> BOOL
 %token <floatval> APPROXNUM
-%token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INTEGER INDEF ASC ORDER BY DESC SELECT FROM WHERE DELETE UPDATE SET
+%token <sym> AUTO_INCREMENT CREATE DATABASE INDEX INSERT INTO VALUES PRIMARY KEY NULLX SCHEMA TABLE VARCHAR INTEGER INDEF ASC ORDER BY DESC SELECT FROM WHERE DELETE UPDATE SET OR ANDOP
 
 %type <columnlist> create_col_list 
 %type <columnlist> column_list
@@ -33,15 +34,16 @@
 %type <columnval> data_type
 %type <columnval> select_expr
 %type <columnval> expr
+%type <const_val> opt_where
 
 %token <strval> USERVAR
 %right '='
 %left OR
-%left XOR
 %left ANDOP
-%left NOT '!'
+%left NOT
 %left '|'
 %left '&'
+%left GT GE LT LE NE
 %left '+' '-'
 %left '*' '/' '%' MOD
 %left '^'
@@ -62,8 +64,14 @@ expr:         NAME {$$ = createColumn($1->str, 0, 0, $1);}
             | BOOL {;}
             ;
 
-expr:         expr '=' expr {;}
-            | expr '+' expr {;}
+expr:         expr '=' expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code2(eq, STOP);}
+            | expr GT expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code2(gt, STOP);}
+            | expr GE expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code2(ge, STOP);}
+            | expr LT expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code2(lt, STOP);}
+            | expr LE expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code2(le, STOP);}
+            | expr NE expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code2(ne, STOP);}
+            | expr OR expr {code(or);}
+            | expr ANDOP expr {code(and);}
             ;
 /* Create database */
 stmt:         create_database_stmt {;}
@@ -128,11 +136,12 @@ insert_vals:  expr {$$ = columnlist($1, 0);}
 stmt: select_stmt {;}
             ;
 
-select_stmt:  SELECT select_expr_list FROM table_references opt_where opt_orderby {code2(selectsql, (Inst)$2);}
+select_stmt:  SELECT select_expr_list FROM table_references opt_where opt_orderby {code3(selectsql, (Inst)$2, (Inst)$5); code(STOP);}
             ;
 
-opt_where: /* Vacio */
-            | WHERE expr {;}
+/* Where */
+opt_where: /* Vacio */ {$$ = (Datum *)0;}
+            | WHERE expr {$$ = (Datum *)1;}
             ;
 opt_orderby: /* Vacio */
             | ORDER BY groupby_list {;}
@@ -203,8 +212,9 @@ void fpecatch(){
 int yylex (){
   	int c;
 
-  	while ((c = getchar ()) == ' ' || c == '\t' || c == '\n')
-  		;
+  	while ((c = getchar ()) == ' ' || c == '\t' || c == '\n'){
+        lineno = c == '\n' ? lineno + 1 : lineno;
+    }
  	if (c == EOF)                            
     		return 0;
   	if (isdigit (c)) {
@@ -245,7 +255,12 @@ int yylex (){
  		//printf("func=(%s) tipo=(%d) \n", s->name, s->type);
         return s->type;
 	}
-    return c;
+    switch(c) {
+        case '>' :   return follow('=', GE, GT);
+        case '<' :   return follow('=', LE, LT);
+        case '!' :   return follow('=', NE, NOT);
+        default  :   return c;
+    }
 }
 void yyerror (char *s) {
 	warning(s, (char *) 0);
@@ -256,8 +271,9 @@ void warning(char *s, char *t){
 		fprintf (stderr, " %s", t);
 	fprintf (stderr, " cerca de la linea %d\n", lineno);
 }
-void defnonly(char *s){     /* If illegal definition */
-    if(!indef){
-        execerror(s, "used outside definition");
-    }
+int follow(int expect, int ifyes, int ifno){
+    int c = getchar();
+    if(c == expect) return ifyes;
+    ungetc(c, stdin);
+    return ifno;
 }

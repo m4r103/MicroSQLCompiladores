@@ -30,6 +30,7 @@ union Datum{
     int intval;
     char *str;
     Symbol *sym;
+    Columnval *col;
 };
 struct Column{      /* Columnas de una tabla */
     Columnval *val;
@@ -76,7 +77,7 @@ void  initcode();
 void  push(Datum);
 Datum pop();
 int   constpush();
-int   varpush();
+int   colpush();
 Inst  *code(Inst);
 void  execute(Inst *);
 
@@ -88,5 +89,13 @@ int insert();
 int selectsql();
 int deletesql();
 int updatesql();
+int eq();
+int gt();
+int ge();
+int lt();
+int le();
+int ne();
+int or();
+int and();
 
 #endif

@@ -32,6 +32,8 @@ static struct {
     "delete",           DELETE,
     "update",           UPDATE,
     "set",              SET,
+    "and",              ANDOP,
+    "or",               OR,
     0,                  0,
 };
 
@@ -88,9 +90,9 @@ int constpush(){
     d = (Datum *)*pc++;
     push(*d);
 }
-int varpush(){
+int colpush(){
     Datum d;
-    d.sym = (Symbol *)(*pc++);
+    d.col = (Columnval *)(*pc++);
     push(d);
 }
 
@@ -175,7 +177,9 @@ int selectsql(){
     printf("Consultando tabla %s\n", d1.str);
     printf("Campos:\n");
     Column *campos;
+    Datum *where;
     campos = (Column *)*pc++;
+    where = (Datum *)*pc++;
     Column *c;
     if(campos == 0){
         printf("* (Todos)\n");
@@ -183,6 +187,32 @@ int selectsql(){
         for(c = campos; c!=0; c = c->next){
             printf("%s\n", c->val->nombre);
         }
+    }
+    if(where == 0){return 0;} // Sin where
+    else{ // Incluye where
+        Inst *codigoWhere = pc;
+        //for cada registro{
+            pc = codigoWhere;
+            while(*pc != STOP){ //Ejecucion de comparaciones y and, or
+                //d1 = pop();
+                //printf("Atributo a comparar %s\n", d1.col->nombre);
+                /*Si el atributo es string
+                d1.col->val->str = "string del atributo";
+                Si el atributo es entero
+                d1.col->val->intval = 10;
+                push(d1);
+                */
+                execute(pc);
+                pc++;
+            }
+            //d1 = pop();
+            /*if(d1.intval){
+                registro cumple con where
+            }else{
+                registro no cumple con where
+            }
+            */
+        //} end for
     }
 }
 int deletesql(){
@@ -208,4 +238,36 @@ int updatesql(){
                 break;
         }
     }
+}
+int eq(){ /* d1 = d2 */
+    Datum d1, d2, d3;
+    d2 = pop();
+    d1 = pop();
+    int tipo = d1.col->type + d2.col->type;
+    char *temp = "prueba";
+    printf("Comparando (a == b)\n");
+    switch(tipo){
+        case STRING: /* Comparando strings */
+            d3.intval = strcmp(d1.col->val->str, d2.col->val->str);
+            break;
+        case INTNUM: /* Comparando enteros */
+            d3.intval = d1.col->val->intval == d2.col->val->intval;
+            break;
+    }
+    printf("Resultado == : %d\n", d3.intval);
+    //push(d3); //guardar resultado en la pila
+}
+int gt(){
+}
+int ge(){
+}
+int lt(){
+}
+int le(){
+}
+int ne(){
+}
+int and(){
+}
+int or(){
 }
