@@ -37,6 +37,7 @@ int follow(int, int, int);
 %type <const_val> opt_where
 %type <inst> codeselect
 %type <inst> codedelete
+%type <inst> codeupdate
 
 %token <strval> USERVAR
 %left '|'
@@ -65,12 +66,48 @@ expr:         NAME {$$ = createColumn($1->str, 0, 0, $1);}
             | BOOL {;}
             ;
 
-expr:         expr '=' expr{code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code(STOP); code2(eq, STOP);}
-            | expr GT expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code(STOP); code2(gt, STOP);}
-            | expr GE expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code(STOP); code2(ge, STOP);}
-            | expr LT expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code(STOP); code2(lt, STOP);}
-            | expr LE expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code(STOP); code2(le, STOP);}
-            | expr NE expr {code2(colpush, $1->type == 0 ? (Inst)$3 : (Inst)$1); code2(colpush, $1->type == 0 ?(Inst)$1:(Inst)$3); code(STOP); code2(ne, STOP);}
+expr:         expr '=' expr{    
+                                if($1->type == 0){
+                                    code2(colpush, (Inst)$3); code2(colpush, (Inst)$1); code(STOP); code2(eq, STOP);
+                                }else{
+                                    code2(colpush, (Inst)$1); code2(colpush, (Inst)$3); code(STOP); code2(eq, STOP);
+                                }
+                            }
+            | expr GT expr {
+                                if($1->type == 0){
+                                    code2(colpush, (Inst)$3); code2(colpush, (Inst)$1); code(STOP); code2(lt, STOP);
+                                }else{
+                                    code2(colpush, (Inst)$1); code2(colpush, (Inst)$3); code(STOP); code2(gt, STOP);
+                                }
+                           }
+            | expr GE expr {
+                                if($1->type == 0){
+                                    code2(colpush, (Inst)$3); code2(colpush, (Inst)$1); code(STOP); code2(le, STOP);
+                                }else{
+                                    code2(colpush, (Inst)$1); code2(colpush, (Inst)$3); code(STOP); code2(ge, STOP);
+                                }
+                           }
+            | expr LT expr {
+                                if($1->type == 0){
+                                    code2(colpush, (Inst)$3); code2(colpush, (Inst)$1); code(STOP); code2(gt, STOP);
+                                }else{
+                                    code2(colpush, (Inst)$1); code2(colpush, (Inst)$3); code(STOP); code2(lt, STOP);
+                                }
+                           }
+            | expr LE expr {
+                                if($1->type == 0){
+                                    code2(colpush, (Inst)$3); code2(colpush, (Inst)$1); code(STOP); code2(ge, STOP);
+                                }else{
+                                    code2(colpush, (Inst)$1); code2(colpush, (Inst)$3); code(STOP); code2(le, STOP);
+                                }
+                           }
+            | expr NE expr {
+                                if($1->type == 0){
+                                    code2(colpush, (Inst)$3); code2(colpush, (Inst)$1); code(STOP); code2(ne, STOP);
+                                }else{
+                                    code2(colpush, (Inst)$1); code2(colpush, (Inst)$3); code(STOP); code2(ne, STOP);
+                                }
+                           }
             | expr OR expr {code2(or, STOP);}
             | expr ANDOP expr {code2(and, STOP);}
             ;
@@ -143,7 +180,8 @@ select_stmt:  SELECT select_expr_list FROM table_references codeselect opt_where
                 code(STOP);
             }
             ;
-codeselect:         {$$ = code(selectsql); code2(STOP, STOP);}
+codeselect:   {$$ = code(selectsql); code2(STOP, STOP);}
+            ;
 
 /* Where */
 opt_where: /* Vacio */ {$$ = (Datum *)0;}
@@ -177,12 +215,19 @@ delete_stmt:  DELETE FROM table_references codedelete opt_where opt_orderby {
                 code(STOP);
            }
             ;
-codedelete:         {$$ = code(deletesql); code(STOP);}
+codedelete:   {$$ = code(deletesql); code(STOP);}
+            ;
 
 /* UPDATE */
 stmt:         update_stmt {;}
             ;
-update_stmt:  UPDATE table_references SET update_asgn_list opt_where opt_orderby {code2(updatesql, (Inst)$4);}
+update_stmt:  UPDATE table_references SET update_asgn_list codeupdate opt_where opt_orderby {
+                ($5)[1] = (Inst)$4;
+                ($5)[2] = (Inst)$6;
+                code(STOP);
+            }
+            ;
+codeupdate:   {$$ = code(updatesql); code2(STOP, STOP);}
             ;
 update_asgn_list:   NAME '=' expr {$3->nombre = $1->str; $$ = columnlist($3, 0);}
                   | update_asgn_list ',' NAME '=' expr {$5->nombre = $3->str; $$ = columnlist($5, $1);}

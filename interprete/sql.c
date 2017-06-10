@@ -243,6 +243,22 @@ int updatesql(){
                 break;
         }
     }
+    Datum *where;
+    where = (Datum *)*pc++;
+    if(where == 0){return 0;} // Sin where, actualizar todo
+    else{ // Incluye where
+        printf("Where\n");
+        Inst *codigoWhere = pc;
+        //for cada registro{
+            pc = codigoWhere;
+            if(wheresql(codigoWhere)){
+                printf("Registro cumple con where\n");
+            }else{
+                printf("Registro NO cumple con where\n");
+            }
+        //} end for
+        pc++;
+    }
 }
 int wheresql(Inst *codigoWhere){
     Datum d1;
@@ -259,9 +275,9 @@ int wheresql(Inst *codigoWhere){
         printf("Atributo a comparar %s\n", d1.col->nombre);
         /* Actualizar atributo con valor del registro actual */
         /*Si el atributo es string*/
-        d1.col->val->str = "jorge"; //Valor de prueba
+        //d1.col->val->str = "jorge"; //Valor de prueba
         /*Si el atributo es entero*/
-        //d1.col->val->intval = 10;
+        d1.col->val->intval = 10;
         push(d1);
         execute(pc);    //Ejecutar comparacion
         pc++;
@@ -286,14 +302,44 @@ int eq(){ /* d1 = d2 */
     push(d3); //guardar resultado en la pila
 }
 int gt(){
+    Datum d1, d2, d3;
+    d2 = pop();
+    d1 = pop();
+    printf("%d > %d\n", d1.col->val->intval, d2.col->val->intval);
+    d3.intval = d1.col->val->intval > d2.col->val->intval;
+    push(d3);
 }
 int ge(){
+    Datum d1, d2, d3;
+    d2 = pop();
+    d1 = pop();
+    printf("%d >= %d\n", d1.col->val->intval, d2.col->val->intval);
+    d3.intval = d1.col->val->intval >= d2.col->val->intval;
+    push(d3);
 }
 int lt(){
+    Datum d1, d2, d3;
+    d2 = pop();
+    d1 = pop();
+    printf("%d < %d\n", d1.col->val->intval, d2.col->val->intval);
+    d3.intval = d1.col->val->intval < d2.col->val->intval;
+    push(d3);
 }
 int le(){
+    Datum d1, d2, d3;
+    d2 = pop();
+    d1 = pop();
+    printf("%d <= %d\n", d1.col->val->intval, d2.col->val->intval);
+    d3.intval = d1.col->val->intval <= d2.col->val->intval;
+    push(d3);
 }
 int ne(){
+    Datum d1, d2, d3;
+    d2 = pop();
+    d1 = pop();
+    printf("%d != %d\n", d1.col->val->intval, d2.col->val->intval);
+    d3.intval = d1.col->val->intval != d2.col->val->intval;
+    push(d3);
 }
 int and(){
     Datum d1, d2, d3;
