@@ -50,7 +50,7 @@ Tabla::Tabla(std::string nombre)
 	pugi::xml_parse_result result = this->documento.load_file(nombre.c_str());
 	if (!result)
 	{
-		std::cout << "Creando archivo" << std::endl;
+		// std::cout << "Creando archivo" << std::endl;
 		pugi::xml_node decl = this->documento.prepend_child(pugi::node_declaration);
 		decl.append_attribute("version") = "1.0";
 		decl.append_attribute("encoding") = "UTF-8";
@@ -64,7 +64,7 @@ Tabla::Tabla(std::string nombre)
 	}
 	if (result)
 	{
-		std::cout << "Archivo cargado" << std::endl;
+		// std::cout << "Archivo cargado" << std::endl;
 		this->tabla = this->documento.first_child();
 		pugi::xml_node defi = this->tabla.child("definicion");
 		pugi::xml_attribute name;

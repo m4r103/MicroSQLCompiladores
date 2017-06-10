@@ -57,6 +57,7 @@ public:
 	bool removeColumna(std::string nombre);
 	/*/Muestra en pantalla las columnas*/
 	void desplegarListaColumnas();
+	/*Devuelve el numero de columnas*/	
 	int getNumeroColumnas();
 	/*Modifica el xml con los valores de str_registro.atributo_valor donde el id sea igual a str_registro.id
 	en caso de error retorna false*/
