@@ -264,5 +264,7 @@ __pycache__/
 *.xml
 *.exe
 *.o
+*.tab.cpp
+*.tab.hpp
 *.tab.c
 *.tab.h
