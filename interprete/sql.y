@@ -279,9 +279,9 @@ int yylex (){
         scanf ("%d", &(yylval.const_val->intval));
 	    return INTNUM;
     }
-    if(c == '\"'){
+    if(c == '\''){
 		char sbuf[200], *p=sbuf;
-		while ((c=getchar())!=EOF && c != '\"'){
+		while ((c=getchar())!=EOF && c != '\''){
 			*p++=c;
         }
         if(c == EOF) return 0;
