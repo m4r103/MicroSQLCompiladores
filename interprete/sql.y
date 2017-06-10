@@ -237,7 +237,8 @@ update_asgn_list:   NAME '=' expr {$3->nombre = $1->str; $$ = columnlist($3, 0);
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
-#include<setjmp.h>
+#include <setjmp.h>
+#include <string.h>
 
 char *progname;
 int lineno = 1;
@@ -286,9 +287,7 @@ int yylex (){
         if(c == EOF) return 0;
         *p = 0;
         yylval.const_val = (Datum *)malloc(sizeof(Datum));
-        char *temp = (char *)malloc(strlen(sbuf));
-        memcpy(temp, sbuf, strlen(sbuf));
-        yylval.const_val->str = temp; 
+        yylval.const_val->str = strdup(sbuf); 
         return STRING;
     }
 	if(isalpha(c)){
@@ -301,9 +300,7 @@ int yylex (){
 		*p='\0';
 		if((s=lookup(sbuf))==(Symbol *)NULL){
             yylval.const_val = (Datum *)malloc(sizeof(Datum));
-            char *temp = (char *)malloc(strlen(sbuf));
-            memcpy(temp, sbuf, strlen(sbuf));
-		    yylval.const_val->str = temp; 
+		    yylval.const_val->str = strdup(sbuf); 
 			return NAME;
         }
 		yylval.sym=s;   
