@@ -1,5 +1,8 @@
 #include "sql.h"
-#include  "sql.tab.h"
+#include "sql.tab.hpp"
+#include <stack>
+
+std::stack<std::vector<str_registro>> std_stack;
 
 Inst prog[NPROG];   /* La maquina */
 Inst *progp;        /* Siguiente celda libre en generacion de codigo */
@@ -137,17 +140,18 @@ Columnval *createColumn(char *nombre, short type, int len, Datum *val){
 int createTable(){
     Datum d1;
     d1 = pop();
-    printf("Creando tabla %s\n", d1.str);
-    
-    printf("Parametros:\n");
+    // printf("Creando tabla %s\n", d1.str);
+    Tabla miTabla(d1.str);
+    // printf("Parametros:\n");
     Column *list;
     list = (Column *)*pc++;
     Column *itera;
     for(itera = list; itera!=0; itera = itera->next){
-        printf("%s ", itera->val->nombre);
+        // printf("%s ", itera->val->nombre);
         switch(itera->val->type){
             case VARCHAR:
-                printf("varchar (%d)\n", itera->val->len);
+                // printf("varchar (%d)\n", itera->val->len);
+                miTabla.addColumna(itera->val->nombre,itera->val->len);
                 break;
             case INTNUM:
                 printf("int\n");
@@ -159,8 +163,10 @@ int createTable(){
 int insert(){
     Datum d1;
     d1 = pop();
-    printf("Insertando en tabla %s\n", d1.str);
-    printf("Valores:\n");
+    // printf("Insertando en tabla %s\n", d1.str);
+    // printf("Valores:\n");
+    Tabla miTabla(d1.str);
+    str_registro r1;
     Column *campos, *valores;
     campos = (Column *)*pc++;
     valores = (Column *)*pc++;
@@ -168,7 +174,8 @@ int insert(){
     for(c = campos, v = valores ; c!=0 && v!=0; c = c->next, v = v->next){
         switch(v->val->type){
             case STRING:
-                printf("%s = '%s'\n", c->val->nombre, v->val->val->str);
+                // printf("%s = '%s'\n", c->val->nombre, v->val->val->str);
+                r1.atributo_valor.insert(std::pair<std::string,std::string>(c->val->nombre,v->val->val->str));
                 break;
             case INTNUM:
                 printf("%s = %d\n", c->val->nombre, v->val->val->intval);
@@ -180,18 +187,35 @@ int insert(){
 int selectsql(){
     Datum d1;
     d1 = pop();
-    printf("Consultando tabla %s\n", d1.str);
-    printf("Campos:\n");
+    
+    // printf("Consultando tabla %s\n", d1.str);
+    // printf("Campos:\n");
+    std::vector<std::string> attrib;
+    Tabla miTabla(d1.str);
+    std_stack.push(miTabla.leerRegistros());
     Column *campos;
     Datum *where;
     campos = (Column *)*pc++;
     where = (Datum *)*pc++;
     Column *c;
     if(campos == 0){
-        printf("* (Todos)\n");
+        // printf("* (Todos)\n");
+        for(auto &x : miTabla.getColumnas())
+            std::cout << x << " | ";
+        std::cout << std::endl;
+        std::vector<str_registro> registros = std_stack.top();
+        std_stack.pop();
+        for(auto&x : miTabla.leerRegistros())
+        {
+            for(auto &y : miTabla.getColumnas())
+               std::cout << x.atributo_valor.at(y) << " | ";
+            std::cout << std::endl;
+        }
+
     }else{
         for(c = campos; c!=0; c = c->next){
-            printf("%s\n", c->val->nombre);
+            // printf("%s\n", c->val->nombre);
+            attrib.push_back(c->val->nombre);
         }
     }
     if(where == 0){return 0;} // Sin where
