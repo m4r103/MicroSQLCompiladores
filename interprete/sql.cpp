@@ -182,6 +182,7 @@ int insert(){
                 break;
         }
     }
+    miTabla.insertarRegistro(r1);
     return 0;
 }
 int selectsql(){
