@@ -108,8 +108,8 @@ expr:         expr '=' expr{
                                     code2(colpush, (Inst)$1); code2(colpush, (Inst)$3); code(STOP); code2(ne, STOP);
                                 }
                            }
-            | expr OR expr {code2(or, STOP);}
-            | expr ANDOP expr {code2(and, STOP);}
+            | expr OR expr {code2(log_or, STOP);}
+            | expr ANDOP expr {code2(log_and, STOP);}
             ;
 /* Create database */
 stmt:         create_database_stmt {;}
@@ -242,9 +242,8 @@ update_asgn_list:   NAME '=' expr {$3->nombre = $1->str; $$ = columnlist($3, 0);
 char *progname;
 int lineno = 1;
 jmp_buf begin;
-int indef;
 
-void main (int argc, char *argv[]){
+int main (int argc, char *argv[]){
 	progname=argv[0];
     init();
     setjmp(begin);
@@ -253,6 +252,7 @@ void main (int argc, char *argv[]){
     //yyparse();
   	for(initcode(); yyparse (); initcode())
         execute(progbase);
+    return 0;
 }
 
 void execerror(char *s, char *t){
@@ -260,7 +260,7 @@ void execerror(char *s, char *t){
     longjmp(begin, 0);
 }
 
-void fpecatch(){
+void fpecatch(int val){
     execerror("Excepcion de punto flotante", (char *)0);
 }
 

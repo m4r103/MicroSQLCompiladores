@@ -1,6 +1,9 @@
 #include "sql.h"
 #include  "y.tab.h"
 
+Inst prog[NPROG];   /* La maquina */
+Inst *progp;        /* Siguiente celda libre en generacion de codigo */
+Inst *pc;           /* Contador de programa durante */
 Inst *progbase = prog;
 int wheresql(Inst *);
 
@@ -9,40 +12,40 @@ static struct {
     char *name;
     int kval;
 } keywords[] = {
-    "auto_increment",   AUTO_INCREMENT,
-    "create",           CREATE,
-    "database",         DATABASE,
-    "index",            INDEX,
-    "insert",           INSERT,
-    "into",             INTO,
-    "values",           VALUES,
-    "primary",          PRIMARY,
-    "key",              KEY,
-    "null",             NULLX,
-    "schema",           SCHEMA,
-    "table",            TABLE,
-    "varchar",          VARCHAR,
-    "int",              INTEGER,
-    "asc",              ASC,
-    "order",            ORDER,
-    "by",               BY,
-    "desc",             DESC,
-    "select",           SELECT,
-    "from",             FROM,
-    "where",            WHERE,
-    "delete",           DELETE,
-    "update",           UPDATE,
-    "set",              SET,
-    "and",              ANDOP,
-    "or",               OR,
-    0,                  0,
+    {"auto_increment",   AUTO_INCREMENT},
+    {"create",           CREATE},
+    {"database",         DATABASE},
+    {"index",            INDEX},
+    {"insert",           INSERT},
+    {"into",             INTO},
+    {"values",           VALUES},
+    {"primary",          PRIMARY},
+    {"key",              KEY},
+    {"null",             NULLX},
+    {"schema",           SCHEMA},
+    {"table",            TABLE},
+    {"varchar",          VARCHAR},
+    {"int",              INTEGER},
+    {"asc",              ASC},
+    {"order",            ORDER},
+    {"by",               BY},
+    {"desc",             DESC},
+    {"select",           SELECT},
+    {"from",             FROM},
+    {"where",            WHERE},
+    {"delete",           DELETE},
+    {"update",           UPDATE},
+    {"set",              SET},
+    {"and",              ANDOP},
+    {"or",               OR},
+    {0,                  0}
 };
 
 int init(){
     int i;
-    Symbol *s;
     for(i = 0; keywords[i].name; i++)
         install(keywords[i].name, keywords[i].kval, NULL);
+    return 0;
 }
 
 Symbol *lookup(char *s)    /* encontrar s en la tabla de símbolos */
@@ -70,8 +73,6 @@ Symbol *install(char *s,int t, char *d) /* instalar s en la tabla de símbolos *
 void initcode(){
     stackp = stack;
     progp = progbase;
-    returning = 0;
-    indef = 0;
 }
 
 void push(Datum dato){
@@ -90,11 +91,13 @@ int constpush(){
     Datum *d;
     d = (Datum *)*pc++;
     push(*d);
+    return 0;
 }
 int colpush(){
     Datum d;
     d.col = (Columnval *)(*pc++);
     push(d);
+    return 0;
 }
 
 Inst *code(Inst f){
@@ -113,6 +116,7 @@ int createDatabase(){
     Datum d1;
     d1 = pop();
     printf("Creando base de datos %s\n", d1.str);
+    return 0;
 }
 Column *columnlist(Columnval *columna, Column *list){
     Column *col;
@@ -150,7 +154,7 @@ int createTable(){
             break;
         }
     }
-    
+    return 0;
 }
 int insert(){
     Datum d1;
@@ -171,6 +175,7 @@ int insert(){
                 break;
         }
     }
+    return 0;
 }
 int selectsql(){
     Datum d1;
@@ -203,6 +208,7 @@ int selectsql(){
         //} end for
         pc++;
     }
+    return 0;
 }
 int deletesql(){
     Datum d1;
@@ -224,6 +230,7 @@ int deletesql(){
         //} end for
         pc++;
     }
+    return 0;
 }
 int updatesql(){
     Datum d1;
@@ -259,12 +266,13 @@ int updatesql(){
         //} end for
         pc++;
     }
+    return 0;
 }
 int wheresql(Inst *codigoWhere){
     Datum d1;
     pc = codigoWhere;
     while(*pc != STOP){ // Ejecucion de codigo de where
-        if(*pc == and || *pc == or){    //Ejecucion de and u or
+        if(*pc == log_and || *pc == log_or){    //Ejecucion de and u or
             execute(pc); 
             pc++;
             continue;
@@ -290,7 +298,6 @@ int eq(){ /* d1 = d2 */
     d2 = pop();
     d1 = pop();
     int tipo = d1.col->type + d2.col->type;
-    char *temp = "prueba";
     switch(tipo){
         case STRING: /* Comparando strings */
             d3.intval = strcmp(d1.col->val->str, d2.col->val->str) == 0 ? 1 : 0;
@@ -300,6 +307,7 @@ int eq(){ /* d1 = d2 */
             break;
     }
     push(d3); //guardar resultado en la pila
+    return 0;
 }
 int gt(){
     Datum d1, d2, d3;
@@ -308,6 +316,7 @@ int gt(){
     printf("%d > %d\n", d1.col->val->intval, d2.col->val->intval);
     d3.intval = d1.col->val->intval > d2.col->val->intval;
     push(d3);
+    return 0;
 }
 int ge(){
     Datum d1, d2, d3;
@@ -316,6 +325,7 @@ int ge(){
     printf("%d >= %d\n", d1.col->val->intval, d2.col->val->intval);
     d3.intval = d1.col->val->intval >= d2.col->val->intval;
     push(d3);
+    return 0;
 }
 int lt(){
     Datum d1, d2, d3;
@@ -324,6 +334,7 @@ int lt(){
     printf("%d < %d\n", d1.col->val->intval, d2.col->val->intval);
     d3.intval = d1.col->val->intval < d2.col->val->intval;
     push(d3);
+    return 0;
 }
 int le(){
     Datum d1, d2, d3;
@@ -332,6 +343,7 @@ int le(){
     printf("%d <= %d\n", d1.col->val->intval, d2.col->val->intval);
     d3.intval = d1.col->val->intval <= d2.col->val->intval;
     push(d3);
+    return 0;
 }
 int ne(){
     Datum d1, d2, d3;
@@ -340,18 +352,21 @@ int ne(){
     printf("%d != %d\n", d1.col->val->intval, d2.col->val->intval);
     d3.intval = d1.col->val->intval != d2.col->val->intval;
     push(d3);
+    return 0;
 }
-int and(){
+int log_and(){
     Datum d1, d2, d3;
     d2 = pop();
     d1 = pop();
     d3.intval = d1.intval && d2.intval;
     push(d3);
+    return 0;
 }
-int or(){
+int log_or(){
     Datum d1, d2, d3;
     d2 = pop();
     d1 = pop();
     d3.intval = d1.intval || d2.intval;
     push(d3);
+    return 0;
 }

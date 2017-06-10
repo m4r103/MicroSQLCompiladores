@@ -48,8 +48,9 @@ void yyerror (char *s);
 int yylex ();
 void warning(char *s, char *t);
 void execerror(char *s, char *t);
-void fpecatch();
+void fpecatch(int);
 void defnonly(char *);
+int follow(int, int, int);
 
 /*********** Tabla de simbolos ****/
 int init();
@@ -66,12 +67,10 @@ Symbol *lookup(char *s);
 
 static Datum stack[NSTACK];
 static Datum *stackp;
-Inst prog[NPROG];   /* La maquina */
-Inst *progp;        /* Siguiente celda libre en generacion de codigo */
-Inst *pc;           /* Contador de programa durante ejecucion */
+extern Inst prog[NPROG];   /* La maquina */
+extern Inst *progp;        /* Siguiente celda libre en generacion de codigo */
+extern Inst *pc;           /* Contador de programa durante ejecucion */
 extern Inst *progbase;  /* Inicio del subprograma actual */
-int returning;      /* 1 si se encuentra un return */
-int indef;           /* 1 si se parsea una funcion o procedimiento */
 
 void  initcode();
 void  push(Datum);
@@ -95,7 +94,7 @@ int ge();
 int lt();
 int le();
 int ne();
-int or();
-int and();
+int log_or();
+int log_and();
 
 #endif

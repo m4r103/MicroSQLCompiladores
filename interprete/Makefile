@@ -1,7 +1,7 @@
 Gram=y.tab.c y.tab.h
 
 all: $(Gram) 
-	@gcc -o calc y.tab.c sql.c -lm 
+	@gcc -o calc y.tab.c sql.c -lm -Wall
 	@echo Compiled
 
 $(Gram): sql.y
