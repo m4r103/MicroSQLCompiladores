@@ -1,5 +1,5 @@
 #include "sql.h"
-#include  "y.tab.h"
+#include  "sql.tab.h"
 
 Inst prog[NPROG];   /* La maquina */
 Inst *progp;        /* Siguiente celda libre en generacion de codigo */
