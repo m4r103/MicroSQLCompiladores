@@ -1,11 +1,11 @@
-Gram=y.tab.c y.tab.h
+Gram=sql.tab.c sql.tab.h
 
 all: $(Gram) 
-	@gcc -o calc y.tab.c sql.c -lm -Wall
+	@g++ -std=c++11 -o calc sql.tab.c sql.c -lm -Wall
 	@echo Compiled
 
 $(Gram): sql.y
-	@yacc -d sql.y
+	@bison -d sql.y
 
 clean:
 	@rm -f *.out  *.tab.* calc
