@@ -2,6 +2,7 @@
 #include  "y.tab.h"
 
 Inst *progbase = prog;
+int wheresql(Inst *);
 
 static Symbol *symlist=0;    /* tabla de simbolos: lista ligada */
 static struct {
@@ -190,35 +191,39 @@ int selectsql(){
     }
     if(where == 0){return 0;} // Sin where
     else{ // Incluye where
+        printf("Where\n");
         Inst *codigoWhere = pc;
         //for cada registro{
             pc = codigoWhere;
-            while(*pc != STOP){ //Ejecucion de comparaciones y and, or
-                //d1 = pop();
-                //printf("Atributo a comparar %s\n", d1.col->nombre);
-                /*Si el atributo es string
-                d1.col->val->str = "string del atributo";
-                Si el atributo es entero
-                d1.col->val->intval = 10;
-                push(d1);
-                */
-                execute(pc);
-                pc++;
-            }
-            //d1 = pop();
-            /*if(d1.intval){
-                registro cumple con where
+            if(wheresql(codigoWhere)){
+                printf("Registro cumple con where\n");
             }else{
-                registro no cumple con where
+                printf("Registro NO cumple con where\n");
             }
-            */
         //} end for
+        pc++;
     }
 }
 int deletesql(){
     Datum d1;
     d1 = pop();
     printf("Eliminando de tabla %s\n", d1.str);
+    Datum *where;
+    where = (Datum *)*pc++;
+    if(where == 0){return 0;} // Sin where, eliminar todo
+    else{ // Incluye where
+        printf("Where\n");
+        Inst *codigoWhere = pc;
+        //for cada registro{
+            pc = codigoWhere;
+            if(wheresql(codigoWhere)){
+                printf("Registro cumple con where\n");
+            }else{
+                printf("Registro NO cumple con where\n");
+            }
+        //} end for
+        pc++;
+    }
 }
 int updatesql(){
     Datum d1;
@@ -239,23 +244,46 @@ int updatesql(){
         }
     }
 }
+int wheresql(Inst *codigoWhere){
+    Datum d1;
+    pc = codigoWhere;
+    while(*pc != STOP){ // Ejecucion de codigo de where
+        if(*pc == and || *pc == or){    //Ejecucion de and u or
+            execute(pc); 
+            pc++;
+            continue;
+        }
+        execute(pc); //Insertar operandos en la pila
+        pc++;
+        d1 = pop();
+        printf("Atributo a comparar %s\n", d1.col->nombre);
+        /* Actualizar atributo con valor del registro actual */
+        /*Si el atributo es string*/
+        d1.col->val->str = "jorge"; //Valor de prueba
+        /*Si el atributo es entero*/
+        //d1.col->val->intval = 10;
+        push(d1);
+        execute(pc);    //Ejecutar comparacion
+        pc++;
+    }
+    d1 = pop();
+    return d1.intval;
+}
 int eq(){ /* d1 = d2 */
     Datum d1, d2, d3;
     d2 = pop();
     d1 = pop();
     int tipo = d1.col->type + d2.col->type;
     char *temp = "prueba";
-    printf("Comparando (a == b)\n");
     switch(tipo){
         case STRING: /* Comparando strings */
-            d3.intval = strcmp(d1.col->val->str, d2.col->val->str);
+            d3.intval = strcmp(d1.col->val->str, d2.col->val->str) == 0 ? 1 : 0;
             break;
         case INTNUM: /* Comparando enteros */
             d3.intval = d1.col->val->intval == d2.col->val->intval;
             break;
     }
-    printf("Resultado == : %d\n", d3.intval);
-    //push(d3); //guardar resultado en la pila
+    push(d3); //guardar resultado en la pila
 }
 int gt(){
 }
@@ -268,6 +296,16 @@ int le(){
 int ne(){
 }
 int and(){
+    Datum d1, d2, d3;
+    d2 = pop();
+    d1 = pop();
+    d3.intval = d1.intval && d2.intval;
+    push(d3);
 }
 int or(){
+    Datum d1, d2, d3;
+    d2 = pop();
+    d1 = pop();
+    d3.intval = d1.intval || d2.intval;
+    push(d3);
 }
