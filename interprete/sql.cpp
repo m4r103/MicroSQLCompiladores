@@ -4,8 +4,8 @@
 
 std::vector<std::vector<str_registro>> std_stack;
 std::vector<std::vector<str_registro>> std_stack2;
-std::vector<std::string> atributos_comp;
 
+std::vector<str_registro> unir(std::vector<str_registro> a, std::vector<str_registro> b);
 std::vector<str_registro> intersectar(std::vector<str_registro> a,std::vector<str_registro> b);
 
 Inst prog[NPROG];   /* La maquina */
@@ -417,6 +417,7 @@ int wheresql(Inst *codigoWhere){
         execute(pc);    //Ejecutar comparacion
         pc++;
     }
+    std_stack.pop_back();
     std_stack.push_back(std_stack2.back());
     std_stack2.clear();
     d1 = pop();
@@ -445,7 +446,6 @@ int eq(){ /* d1 = d2 */
             //d3.intval = strcmp(d1.col->val->str, d2.col->val->str) == 0 ? 1 : 0;
             if(existe)
             {
-                atributos_comp.push_back(d2.col->val->str);
                 for(auto &x : r1)
                 {
                     if(x.atributo_valor.at(d2.col->val->str) == d1.col->val->str)
@@ -536,8 +536,51 @@ int log_or(){
     d2 = pop();
     d1 = pop();
     d3.intval = d1.intval || d2.intval;
+    if(d3.intval)
+    {
+        std::vector<str_registro> op1 = std_stack2.back();
+        std_stack2.pop_back();
+        std::vector<str_registro> op2 = std_stack2.back();
+        std_stack2.pop_back();
+        std_stack2.push_back(unir(op1,op2));
+    }
     push(d3);
     return 0;
+}
+
+std::vector<str_registro> unir(std::vector<str_registro> a, std::vector<str_registro> b)
+{
+    std::vector<str_registro> aux = intersectar(a,b);
+    for(auto &x : b)
+    {
+        bool finded= false;
+        for(auto &y : aux)
+        {
+            if(x.id == y.id)
+            {
+                finded = true;
+                break;
+            }
+        }
+        if(!finded)
+            aux.push_back(x);
+    }
+    for(auto &x : a)
+    {
+        bool finded= false;
+        for(auto &y : aux)
+        {
+            if(x.id == y.id)
+            {
+                finded = true;
+                break;
+            }
+        }
+        if(!finded)
+            aux.push_back(x);
+    }
+    return aux;
+
 }
 
 std::vector<str_registro> intersectar(std::vector<str_registro> a,std::vector<str_registro> b)
