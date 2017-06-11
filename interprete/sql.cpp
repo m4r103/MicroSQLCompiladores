@@ -493,46 +493,211 @@ int eq(){ /* d1 = d2 */
             d3.intval =  (r2.size() > 0) ? 1 : 0;
             break;
         case INTNUM: /* Comparando enteros */
-            d3.intval = d1.col->val->intval == d2.col->val->intval;
+            if(existe)
+            {
+                for(auto &x : r1)
+                {
+                    std::string d = x.atributo_valor.at(d2.col->val->str);
+                    if(std::atoi(d.c_str()) == d1.col->val->intval)
+                    {
+                        printf("es igual\n");
+                        r2.push_back(x);
+                    }
+                }
+            }else{
+                printf("No existe el atributo '%s' en la tabla\n",d2.col->val->str);
+            }
+            d3.intval = (r2.size() > 0) ? 1 : 0;
+            // d3.intval = d1.col->val->intval == d2.col->val->intval;
             break;
     }
     std_stack2.push_back(r2);
     push(d3); //guardar resultado en la pila
     return 0;
 }
+/*Error: Se activa la funcion gt() al leer un simbolo < */
 int gt(){
     Datum d1, d2, d3;
     d2 = pop();
     d1 = pop();
-    printf("%d > %d\n", d1.col->val->intval, d2.col->val->intval);
-    d3.intval = d1.col->val->intval > d2.col->val->intval;
+    std::vector<str_registro> r1 = std_stack.back();
+    std::vector<str_registro> r2;
+    int tipo = d1.col->type + d2.col->type;
+    int existe = 0;
+    for(auto &x : r1.front().atributo_valor)
+    {
+        if(x.first == d2.col->val->str)
+        {
+            existe = 1;
+            break;
+        }
+    }
+    switch(tipo)
+    {
+        case STRING:
+            printf("No se puede aplicar '>' a cadenas\n");
+            break;
+        case INTNUM:
+        if(existe)
+            {
+                for(auto &x : r1)
+                {
+                    std::string d = x.atributo_valor.at(d2.col->val->str);
+                    if(std::atoi(d.c_str()) < d1.col->val->intval)
+                    {
+                        printf("%d es mayor que %d \n",std::atoi(d.c_str()),d1.col->val->intval);
+                        r2.push_back(x);
+                    }
+                }
+            }else{
+                printf("No existe el atributo '%s' en la tabla\n",d2.col->val->str);
+            }
+            d3.intval = (r2.size() > 0) ? 1 : 0;
+            break;
+
+    }
+    std_stack2.push_back(r2);
+    // printf("%d > %d\n", d1.col->val->intval, d2.col->val->intval);
+    // d3.intval = d1.col->val->intval > d2.col->val->intval;
     push(d3);
     return 0;
 }
+/*Error: Se activa la funcion g() al leer un simbolo <= */
 int ge(){
     Datum d1, d2, d3;
     d2 = pop();
     d1 = pop();
-    printf("%d >= %d\n", d1.col->val->intval, d2.col->val->intval);
-    d3.intval = d1.col->val->intval >= d2.col->val->intval;
+    std::vector<str_registro> r1 = std_stack.back();
+    std::vector<str_registro> r2;
+    int tipo = d1.col->type + d2.col->type;
+    int existe = 0;
+    for(auto &x : r1.front().atributo_valor)
+    {
+        if(x.first == d2.col->val->str)
+        {
+            existe = 1;
+            break;
+        }
+    }
+    switch(tipo)
+    {
+        case STRING:
+            printf("No se puede aplicar '<=' a cadenas\n");
+            break;
+        case INTNUM:
+        if(existe)
+            {
+                for(auto &x : r1)
+                {
+                    std::string d = x.atributo_valor.at(d2.col->val->str);
+                    if(std::atoi(d.c_str()) <= d1.col->val->intval)
+                    {
+                        printf("es mayor o igual\n");
+                        r2.push_back(x);
+                    }
+                }
+            }else{
+                printf("No existe el atributo '%s' en la tabla\n",d2.col->val->str);
+            }
+            d3.intval = (r2.size() > 0) ? 1 : 0;
+            break;
+    }
+    std_stack2.push_back(r2);    
+    // printf("%d >= %d\n", d1.col->val->intval, d2.col->val->intval);
+    // d3.intval = d1.col->val->intval >= d2.col->val->intval;
     push(d3);
     return 0;
 }
+/*Error: Se activa la funcion lt() al leer un simbolo > */
 int lt(){
     Datum d1, d2, d3;
     d2 = pop();
     d1 = pop();
-    printf("%d < %d\n", d1.col->val->intval, d2.col->val->intval);
-    d3.intval = d1.col->val->intval < d2.col->val->intval;
+    std::vector<str_registro> r1 = std_stack.back();
+    std::vector<str_registro> r2;
+    int tipo = d1.col->type + d2.col->type;
+    int existe = 0;
+    for(auto &x : r1.front().atributo_valor)
+    {
+        if(x.first == d2.col->val->str)
+        {
+            existe = 1;
+            break;
+        }
+    }
+    switch(tipo)
+    {
+        case STRING:
+            printf("No se puede aplicar '>' a cadenas\n");
+            break;
+        case INTNUM:
+        if(existe)
+            {
+                for(auto &x : r1)
+                {
+                    std::string d = x.atributo_valor.at(d2.col->val->str);
+                    if(std::atoi(d.c_str()) > d1.col->val->intval)
+                    {
+                        r2.push_back(x);
+                    }
+                }
+            }else{
+                printf("No existe el atributo '%s' en la tabla\n",d2.col->val->str);
+            }
+            d3.intval = (r2.size() > 0) ? 1 : 0;
+            break;
+
+    }
+    std_stack2.push_back(r2);
+    // printf("%d < %d\n", d1.col->val->intval, d2.col->val->intval);
+    // d3.intval = d1.col->val->intval < d2.col->val->intval;
     push(d3);
     return 0;
 }
+/*Error: Se activa la funcion le() al leer un simbolo >= */
 int le(){
     Datum d1, d2, d3;
     d2 = pop();
     d1 = pop();
-    printf("%d <= %d\n", d1.col->val->intval, d2.col->val->intval);
-    d3.intval = d1.col->val->intval <= d2.col->val->intval;
+    std::vector<str_registro> r1 = std_stack.back();
+    std::vector<str_registro> r2;
+    int tipo = d1.col->type + d2.col->type;
+    int existe = 0;
+    for(auto &x : r1.front().atributo_valor)
+    {
+        if(x.first == d2.col->val->str)
+        {
+            existe = 1;
+            break;
+        }
+    }
+    switch(tipo)
+    {
+        case STRING:
+            printf("No se puede aplicar '>=' a cadenas\n");
+            break;
+        case INTNUM:
+        if(existe)
+            {
+                for(auto &x : r1)
+                {
+                    std::string d = x.atributo_valor.at(d2.col->val->str);
+                    if(std::atoi(d.c_str()) >= d1.col->val->intval)
+                    {
+                         printf("es menor o igual\n");
+                        r2.push_back(x);
+                    }
+                }
+            }else{
+                printf("No existe el atributo '%s' en la tabla\n",d2.col->val->str);
+            }
+            d3.intval = (r2.size() > 0) ? 1 : 0;
+            break;
+
+    }
+    std_stack2.push_back(r2);
+    // printf("%d <= %d\n", d1.col->val->intval, d2.col->val->intval);
+    // d3.intval = d1.col->val->intval <= d2.col->val->intval;
     push(d3);
     return 0;
 }
@@ -540,8 +705,61 @@ int ne(){
     Datum d1, d2, d3;
     d2 = pop();
     d1 = pop();
-    printf("%d != %d\n", d1.col->val->intval, d2.col->val->intval);
-    d3.intval = d1.col->val->intval != d2.col->val->intval;
+    std::vector<str_registro> r1 = std_stack.back();
+    std::vector<str_registro> r2;
+    //std_stack.pop();
+    int tipo = d1.col->type + d2.col->type;
+    int existe = 0;
+    for(auto &x : r1.front().atributo_valor)
+    {
+        if(x.first == d2.col->val->str)
+        {
+            existe = 1;
+            break;
+        }
+    }
+    switch(tipo){
+        case STRING: /* Comparando strings */
+            //d3.intval = strcmp(d1.col->val->str, d2.col->val->str) == 0 ? 1 : 0;
+            if(existe)
+            {
+                for(auto &x : r1)
+                {
+                    if(x.atributo_valor.at(d2.col->val->str) != d1.col->val->str)
+                    {
+                        // std::cout << "Nombre columna: " << d2.col->val->str << std::endl
+                        //           << "Valor real: " <<x.atributo_valor.at(d2.col->val->str) << std:: endl
+                        //           << "valor deseado: "<< d1.col->val->str << std::endl;
+                        r2.push_back(x);
+                    }
+                }
+            }else{
+                printf("No existe el atributo'%s' en la tabla\n",d2.col->val->str);
+            }
+            d3.intval =  (r2.size() > 0) ? 1 : 0;
+            break;
+        case INTNUM: /* Comparando enteros */
+            if(existe)
+            {
+                for(auto &x : r1)
+                {
+                    std::string d = x.atributo_valor.at(d2.col->val->str);
+                    if(std::atoi(d.c_str()) != d1.col->val->intval)
+                    {
+                        printf("es diferente\n");
+                        r2.push_back(x);
+                    }
+                }
+            }else{
+                printf("No existe el atributo '%s' en la tabla\n",d2.col->val->str);
+            }
+            d3.intval = (r2.size() > 0) ? 1 : 0;
+            // d3.intval = d1.col->val->intval == d2.col->val->intval;
+            break;
+    }
+    std_stack2.push_back(r2);
+    // printf("%d != %d\n", d1.col->val->intval, d2.col->val->intval);
+    // d3.intval = d1.col->val->intval != d2.col->val->intval;
     push(d3);
     return 0;
 }
