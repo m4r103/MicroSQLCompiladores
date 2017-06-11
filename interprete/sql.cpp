@@ -2,7 +2,11 @@
 #include "sql.tab.hpp"
 #include <stack>
 
-std::stack<std::vector<str_registro>> std_stack;
+std::vector<std::vector<str_registro>> std_stack;
+std::vector<std::vector<str_registro>> std_stack2;
+std::vector<std::string> atributos_comp;
+
+std::vector<str_registro> intersectar(std::vector<str_registro> a,std::vector<str_registro> b);
 
 Inst prog[NPROG];   /* La maquina */
 Inst *progp;        /* Siguiente celda libre en generacion de codigo */
@@ -231,7 +235,7 @@ int selectsql(){
         std::cout << "No existe la tabla : " << d1.str << std::endl;
         existe = 0;
     }
-    std_stack.push(miTabla.leerRegistros());
+    std_stack.push_back(miTabla.leerRegistros());
     Column *campos;
     Datum *where;
     campos = (Column *)*pc++;
@@ -256,8 +260,8 @@ int selectsql(){
         }
         if(campos == 0){
             // printf("* (Todos)\n");
-            std::vector<str_registro> registros = std_stack.top();
-            std_stack.pop();
+            std::vector<str_registro> registros = std_stack.back();
+            std_stack.pop_back();
             std::cout << "Atributos" << std:: endl;
             std::cout << "-------------------------------" << std::endl;
             for(auto &x : miTabla.getColumnas())    //Imprime los atributos
@@ -272,8 +276,8 @@ int selectsql(){
             }
 
         }else{
-            std::vector<str_registro> registros = std_stack.top();
-            std_stack.pop();
+            std::vector<str_registro> registros = std_stack.back();
+            std_stack.pop_back();
 
             for(c = campos; c!=0; c = c->next){
                 existe = 0;
@@ -318,7 +322,7 @@ int deletesql(){
     int existe = miTabla.leerTabla(d1.str);
     if(!existe)
         std::cout << "No existe la tabla : " << d1.str << std::endl;
-    std_stack.push(miTabla.leerRegistros());
+    std_stack.push_back(miTabla.leerRegistros());
     Datum *where;
     where = (Datum *)*pc++;
 
@@ -337,8 +341,8 @@ int deletesql(){
         //} end for
         pc++;
     }
-    std::vector<str_registro> registros = std_stack.top();
-    std_stack.pop();
+    std::vector<str_registro> registros = std_stack.back();
+    std_stack.pop_back();
     if(registros.empty())
     {
         printf("0, filas afectadas\n");
@@ -394,6 +398,7 @@ int wheresql(Inst *codigoWhere){
     pc = codigoWhere;
     while(*pc != STOP){ // Ejecucion de codigo de where
         if(*pc == log_and || *pc == log_or){    //Ejecucion de and u or
+            printf("and u or\n");
             execute(pc); 
             pc++;
             continue;
@@ -412,16 +417,19 @@ int wheresql(Inst *codigoWhere){
         execute(pc);    //Ejecutar comparacion
         pc++;
     }
+    std_stack.push_back(std_stack2.back());
+    std_stack2.clear();
     d1 = pop();
     return d1.intval;
 }
+
 int eq(){ /* d1 = d2 */
     Datum d1, d2, d3;
     d2 = pop();
     d1 = pop();
-    std::vector<str_registro> r1 = std_stack.top();
+    std::vector<str_registro> r1 = std_stack.back();
     std::vector<str_registro> r2;
-    std_stack.pop();
+    //std_stack.pop();
     int tipo = d1.col->type + d2.col->type;
     int existe = 0;
     for(auto &x : r1.front().atributo_valor)
@@ -437,6 +445,7 @@ int eq(){ /* d1 = d2 */
             //d3.intval = strcmp(d1.col->val->str, d2.col->val->str) == 0 ? 1 : 0;
             if(existe)
             {
+                atributos_comp.push_back(d2.col->val->str);
                 for(auto &x : r1)
                 {
                     if(x.atributo_valor.at(d2.col->val->str) == d1.col->val->str)
@@ -456,7 +465,7 @@ int eq(){ /* d1 = d2 */
             d3.intval = d1.col->val->intval == d2.col->val->intval;
             break;
     }
-    std_stack.push(r2);
+    std_stack2.push_back(r2);
     push(d3); //guardar resultado en la pila
     return 0;
 }
@@ -510,6 +519,15 @@ int log_and(){
     d2 = pop();
     d1 = pop();
     d3.intval = d1.intval && d2.intval;
+    if(d3.intval)
+    {
+        // std_stack.pop_back();
+        std::vector<str_registro> op1 = std_stack2.back();
+        std_stack2.pop_back();
+        std::vector<str_registro> op2 = std_stack2.back();
+        std_stack2.pop_back();
+        std_stack2.push_back(intersectar(op1,op2));
+    }
     push(d3);
     return 0;
 }
@@ -520,4 +538,21 @@ int log_or(){
     d3.intval = d1.intval || d2.intval;
     push(d3);
     return 0;
+}
+
+std::vector<str_registro> intersectar(std::vector<str_registro> a,std::vector<str_registro> b)
+{
+	std::vector<str_registro> ret;
+	for(auto &x : a)
+	{
+		for(auto &y : b)
+		{
+			if(x.id == y.id)
+			{
+				ret.push_back(x);
+				break;
+			}
+		}
+	}
+	return ret;
 }
