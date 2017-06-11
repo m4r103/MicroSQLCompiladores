@@ -210,22 +210,22 @@ int selectsql(){
     where = (Datum *)*pc++;
     Column *c;
     
-    if(where != 0){
-         // Incluye where
-        printf("Where\n");
-        Inst *codigoWhere = pc;
-        //for cada registro{
-            pc = codigoWhere;
-            if(wheresql(codigoWhere)){
-                printf("Registro cumple con where\n");
-            }else{
-                printf("Registro NO cumple con where\n");
-            }
-        //} end for
-        pc++;
-    }
     if(existe)
     {
+        if(where != 0){
+            // Incluye where
+            // printf("Where\n");
+            Inst *codigoWhere = pc;
+            //for cada registro{
+                pc = codigoWhere;
+                if(wheresql(codigoWhere)){
+                    // printf("Registro cumple con where\n");
+                }else{
+                    // printf("Registro NO cumple con where\n");
+                }
+            //} end for
+            pc++;
+        }
         if(campos == 0){
             // printf("* (Todos)\n");
             std::cout << "Atributos" << std:: endl;
@@ -272,23 +272,35 @@ int selectsql(){
 int deletesql(){
     Datum d1;
     d1 = pop();
-    printf("Eliminando de tabla %s\n", d1.str);
+    // printf("Eliminando de tabla %s\n", d1.str);
+    Tabla miTabla;
+    int existe = miTabla.leerTabla(d1.str);
+    if(!existe)
+        std::cout << "No existe la tabla : " << d1.str << std::endl;
+    std_stack.push(miTabla.leerRegistros());
     Datum *where;
     where = (Datum *)*pc++;
-    if(where == 0){return 0;} // Sin where, eliminar todo
+
+    if(where == 0){
+        return 0;
+    } // Sin where, eliminar todo
     else{ // Incluye where
-        printf("Where\n");
+        // printf("Where\n");
         Inst *codigoWhere = pc;
         //for cada registro{
             pc = codigoWhere;
             if(wheresql(codigoWhere)){
-                printf("Registro cumple con where\n");
+                // printf("Registro cumple con where\n");
             }else{
-                printf("Registro NO cumple con where\n");
+                // printf("Registro NO cumple con where\n");
             }
         //} end for
         pc++;
     }
+    std::vector<str_registro> registros = std_stack.top();
+    std_stack.pop();
+    for(auto &x : registros)
+        miTabla.removeRegistro(x);
     return 0;
 }
 int updatesql(){
@@ -368,9 +380,9 @@ int eq(){ /* d1 = d2 */
             {
                 if(x.atributo_valor.at(d2.col->val->str) == d1.col->val->str)
                 {
-                    std::cout << "Nombre columna: " << d2.col->val->str << std::endl
-                              << "Valor real: " <<x.atributo_valor.at(d2.col->val->str) << std:: endl
-                              << "valor deseado: "<< d1.col->val->str << std::endl;
+                    // std::cout << "Nombre columna: " << d2.col->val->str << std::endl
+                    //           << "Valor real: " <<x.atributo_valor.at(d2.col->val->str) << std:: endl
+                    //           << "valor deseado: "<< d1.col->val->str << std::endl;
                     r2.push_back(x);
                 }
             }
