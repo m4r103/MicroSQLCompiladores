@@ -228,14 +228,19 @@ int selectsql(){
         }
         if(campos == 0){
             // printf("* (Todos)\n");
+            std::vector<str_registro> registros = std_stack.top();
+            std_stack.pop();
+            if(registros.size() <= 0)
+            {
+                printf("Tabla vacia \n");
+                return 0;
+            }
             std::cout << "Atributos" << std:: endl;
             std::cout << "-------------------------------" << std::endl;
             for(auto &x : miTabla.getColumnas())    //Imprime los atributos
                 std::cout << x << " | ";
             std::cout << std::endl;
             std::cout <<  "-------------------------------" << std::endl;
-            std::vector<str_registro> registros = std_stack.top();
-            std_stack.pop();
 
             for(auto&x : registros)
             {
@@ -245,6 +250,13 @@ int selectsql(){
             }
 
         }else{
+            std::vector<str_registro> registros = std_stack.top();
+            std_stack.pop();
+            if(registros.size() <= 0)
+            {
+                printf("Tabla vacia \n");
+                return 0;
+            }
             for(c = campos; c!=0; c = c->next){
                 // printf("%s\n", c->val->nombre);
                 attrib.push_back(c->val->nombre);   
@@ -255,8 +267,6 @@ int selectsql(){
                 std::cout << x << " | ";
             std::cout << std::endl;
             std::cout << "-------------------------------" << std::endl;
-            std::vector<str_registro> registros = std_stack.top();
-            std_stack.pop();
 
             for(auto &x : registros)
             {
@@ -281,10 +291,9 @@ int deletesql(){
     Datum *where;
     where = (Datum *)*pc++;
 
-    if(where == 0){
-        return 0;
-    } // Sin where, eliminar todo
-    else{ // Incluye where
+
+     // Sin where, eliminar todo
+    if(where != 0){ // Incluye where
         // printf("Where\n");
         Inst *codigoWhere = pc;
         //for cada registro{
@@ -299,8 +308,18 @@ int deletesql(){
     }
     std::vector<str_registro> registros = std_stack.top();
     std_stack.pop();
+    if(registros.size() <= 0)
+    {
+        printf("0, filas afectadas\n");
+        return 0;
+    }
+    int f = 0;
     for(auto &x : registros)
+    {
+        f++;
         miTabla.removeRegistro(x);
+    }
+    printf("%d, filas afectadas\n",f);
     return 0;
 }
 int updatesql(){

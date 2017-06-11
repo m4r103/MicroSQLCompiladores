@@ -239,6 +239,7 @@ update_asgn_list:   NAME '=' expr {$3->nombre = $1->str; $$ = columnlist($3, 0);
 #include <signal.h>
 #include <setjmp.h>
 #include <string.h>
+#include <ctype.h>
 
 char *progname;
 int lineno = 1;
@@ -294,7 +295,7 @@ int yylex (){
 		Symbol *s;
 		char sbuf[200], *p=sbuf;
 		do {
-			*p++=c;
+			*p++=tolower(c);
 		} while ((c=getchar())!=EOF && isalnum(c));
 		ungetc(c, stdin);
 		*p='\0';
