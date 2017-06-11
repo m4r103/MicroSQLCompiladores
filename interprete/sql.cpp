@@ -165,7 +165,12 @@ int insert(){
     d1 = pop();
     // printf("Insertando en tabla %s\n", d1.str);
     // printf("Valores:\n");
-    Tabla miTabla(d1.str);
+    Tabla miTabla;
+    if(!miTabla.leerTabla(d1.str))
+    {
+        std::cout << "No existe la tabla " << d1.str << std::endl;
+        return 0;
+    }
     str_registro r1;
     Column *campos, *valores;
     campos = (Column *)*pc++;
@@ -188,39 +193,24 @@ int insert(){
 int selectsql(){
     Datum d1;
     d1 = pop();
-    
     // printf("Consultando tabla %s\n", d1.str);
     // printf("Campos:\n");
     std::vector<std::string> attrib;
-    Tabla miTabla(d1.str);
+    Tabla miTabla;
+    if(!miTabla.leerTabla(d1.str))
+    {
+        std::cout << "No existe la tabla : " << d1.str << std::endl;
+        return 0;
+    }
     std_stack.push(miTabla.leerRegistros());
     Column *campos;
     Datum *where;
     campos = (Column *)*pc++;
     where = (Datum *)*pc++;
     Column *c;
-    if(campos == 0){
-        // printf("* (Todos)\n");
-        for(auto &x : miTabla.getColumnas())
-            std::cout << x << " | ";
-        std::cout << std::endl;
-        std::vector<str_registro> registros = std_stack.top();
-        std_stack.pop();
-        for(auto&x : miTabla.leerRegistros())
-        {
-            for(auto &y : miTabla.getColumnas())
-               std::cout << x.atributo_valor.at(y) << " | ";
-            std::cout << std::endl;
-        }
-
-    }else{
-        for(c = campos; c!=0; c = c->next){
-            // printf("%s\n", c->val->nombre);
-            attrib.push_back(c->val->nombre);
-        }
-    }
-    if(where == 0){return 0;} // Sin where
-    else{ // Incluye where
+    
+    if(where != 0){
+         // Incluye where
         printf("Where\n");
         Inst *codigoWhere = pc;
         //for cada registro{
@@ -233,6 +223,30 @@ int selectsql(){
         //} end for
         pc++;
     }
+    
+    if(campos == 0){
+        // printf("* (Todos)\n");
+        for(auto &x : miTabla.getColumnas())    //Imprime los atributos
+            std::cout << x << " | ";
+
+        std::cout << std::endl;
+        std::vector<str_registro> registros = std_stack.top();
+        std_stack.pop();
+
+        for(auto&x : registros)
+        {
+            for(auto &y : miTabla.getColumnas())
+               std::cout << x.atributo_valor.at(y) << " | ";    //Imprime los valores de cada registro
+            std::cout << std::endl;
+        }
+
+    }else{
+        for(c = campos; c!=0; c = c->next){
+            // printf("%s\n", c->val->nombre);
+            attrib.push_back(c->val->nombre);   
+        }
+    }
+    
     return 0;
 }
 int deletesql(){
@@ -306,11 +320,12 @@ int wheresql(Inst *codigoWhere){
         pc++;
         d1 = pop();
         printf("Atributo a comparar %s\n", d1.col->nombre);
+        // printf("Valor atributo %s\n", d1.col->val->str);
         /* Actualizar atributo con valor del registro actual */
         /*Si el atributo es string*/
         //d1.col->val->str = "jorge"; //Valor de prueba
         /*Si el atributo es entero*/
-        d1.col->val->intval = 10;
+        // d1.col->val->intval = 10;
         push(d1);
         execute(pc);    //Ejecutar comparacion
         pc++;
@@ -322,10 +337,24 @@ int eq(){ /* d1 = d2 */
     Datum d1, d2, d3;
     d2 = pop();
     d1 = pop();
+    std::vector<str_registro> r1 = std_stack.top();
+    std::vector<str_registro> r2;
+    std_stack.pop();
     int tipo = d1.col->type + d2.col->type;
     switch(tipo){
         case STRING: /* Comparando strings */
-            d3.intval = strcmp(d1.col->val->str, d2.col->val->str) == 0 ? 1 : 0;
+            //d3.intval = strcmp(d1.col->val->str, d2.col->val->str) == 0 ? 1 : 0;
+            for(auto &x : r1)
+            {
+                if(x.atributo_valor.at(d2.col->val->str) == d1.col->val->str)
+                {
+                    std::cout << "Nombre columna: " << d2.col->val->str << std::endl
+                              << "Valor real: " <<x.atributo_valor.at(d2.col->val->str) << std:: endl
+                              << "valor deseado: "<< d1.col->val->str << std::endl;
+                    r2.push_back(x);
+                }
+            }
+            std_stack.push(r2);
             break;
         case INTNUM: /* Comparando enteros */
             d3.intval = d1.col->val->intval == d2.col->val->intval;
