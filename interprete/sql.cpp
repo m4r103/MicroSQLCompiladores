@@ -166,28 +166,56 @@ int insert(){
     // printf("Insertando en tabla %s\n", d1.str);
     // printf("Valores:\n");
     Tabla miTabla;
-    if(!miTabla.leerTabla(d1.str))
+    int existe = miTabla.leerTabla(d1.str);
+    if(!existe)
     {
         std::cout << "No existe la tabla " << d1.str << std::endl;
-        return 0;
     }
     str_registro r1;
     Column *campos, *valores;
     campos = (Column *)*pc++;
     valores = (Column *)*pc++;
     Column *c, *v;
-    for(c = campos, v = valores ; c!=0 && v!=0; c = c->next, v = v->next){
-        switch(v->val->type){
-            case STRING:
-                // printf("%s = '%s'\n", c->val->nombre, v->val->val->str);
-                r1.atributo_valor.insert(std::pair<std::string,std::string>(c->val->nombre,v->val->val->str));
-                break;
-            case INTNUM:
-                printf("%s = %d\n", c->val->nombre, v->val->val->intval);
-                break;
+    if(existe)
+    {
+        std::vector<std::string> attribs;
+        for(c = campos, v = valores ; c!=0 && v!=0; c = c->next, v = v->next){
+            attribs.push_back(c->val->nombre);
+            switch(v->val->type){
+                case STRING:
+                    // printf("%s = '%s'\n", c->val->nombre, v->val->val->str);
+                    r1.atributo_valor.insert(std::pair<std::string,std::string>(c->val->nombre,v->val->val->str));
+                    break;
+                case INTNUM:
+                    printf("%s = %d\n", c->val->nombre, v->val->val->intval);
+                    break;
+            }
         }
+        for(auto &x : attribs)
+        {
+            existe = 0;
+            for(auto &y : miTabla.getColumnas())
+            {
+                if(x == y)
+                {
+                    existe = 1;
+                    break;
+                }
+            }
+            if(!existe)
+            {
+                printf("No existe el atributo '%s' en la tabla\n",x.c_str());
+                break;
+            }
+            
+        }
+        if(existe)
+        {
+            miTabla.insertarRegistro(r1);
+            printf("1, fila afectada\n");
+        }
+   
     }
-    miTabla.insertarRegistro(r1);
     return 0;
 }
 int selectsql(){
@@ -230,19 +258,13 @@ int selectsql(){
             // printf("* (Todos)\n");
             std::vector<str_registro> registros = std_stack.top();
             std_stack.pop();
-            if(registros.size() <= 0)
-            {
-                printf("Tabla vacia \n");
-                return 0;
-            }
             std::cout << "Atributos" << std:: endl;
             std::cout << "-------------------------------" << std::endl;
             for(auto &x : miTabla.getColumnas())    //Imprime los atributos
                 std::cout << x << " | ";
             std::cout << std::endl;
             std::cout <<  "-------------------------------" << std::endl;
-
-            for(auto&x : registros)
+            for(auto &x : registros)
             {
                 for(auto &y : miTabla.getColumnas())
                 std::cout << x.atributo_valor.at(y) << " | ";    //Imprime los valores de cada registro
@@ -252,14 +274,23 @@ int selectsql(){
         }else{
             std::vector<str_registro> registros = std_stack.top();
             std_stack.pop();
-            if(registros.size() <= 0)
-            {
-                printf("Tabla vacia \n");
-                return 0;
-            }
+
             for(c = campos; c!=0; c = c->next){
+                existe = 0;
                 // printf("%s\n", c->val->nombre);
-                attrib.push_back(c->val->nombre);   
+                for(auto &x : miTabla.getColumnas())
+                {
+                    if(x == c->val->nombre)
+                    {
+                        existe = 1;
+                        break;
+                    }
+                }
+                if(existe == 0)
+                {
+                    printf("No existe el atributo '%s' en la tabla\n",c->val->nombre);
+                }  
+                attrib.push_back(c->val->nombre); 
             }
             std::cout << "Atributos" << std:: endl;            
             std::cout << "-------------------------------" << std::endl;
@@ -267,7 +298,7 @@ int selectsql(){
                 std::cout << x << " | ";
             std::cout << std::endl;
             std::cout << "-------------------------------" << std::endl;
-
+            
             for(auto &x : registros)
             {
                 for(auto &y : attrib)
@@ -308,7 +339,7 @@ int deletesql(){
     }
     std::vector<str_registro> registros = std_stack.top();
     std_stack.pop();
-    if(registros.size() <= 0)
+    if(registros.empty())
     {
         printf("0, filas afectadas\n");
         return 0;
@@ -392,25 +423,40 @@ int eq(){ /* d1 = d2 */
     std::vector<str_registro> r2;
     std_stack.pop();
     int tipo = d1.col->type + d2.col->type;
+    int existe = 0;
+    for(auto &x : r1.front().atributo_valor)
+    {
+        if(x.first == d2.col->val->str)
+        {
+            existe = 1;
+            break;
+        }
+    }
     switch(tipo){
         case STRING: /* Comparando strings */
             //d3.intval = strcmp(d1.col->val->str, d2.col->val->str) == 0 ? 1 : 0;
-            for(auto &x : r1)
+            if(existe)
             {
-                if(x.atributo_valor.at(d2.col->val->str) == d1.col->val->str)
+                for(auto &x : r1)
                 {
-                    // std::cout << "Nombre columna: " << d2.col->val->str << std::endl
-                    //           << "Valor real: " <<x.atributo_valor.at(d2.col->val->str) << std:: endl
-                    //           << "valor deseado: "<< d1.col->val->str << std::endl;
-                    r2.push_back(x);
+                    if(x.atributo_valor.at(d2.col->val->str) == d1.col->val->str)
+                    {
+                        // std::cout << "Nombre columna: " << d2.col->val->str << std::endl
+                        //           << "Valor real: " <<x.atributo_valor.at(d2.col->val->str) << std:: endl
+                        //           << "valor deseado: "<< d1.col->val->str << std::endl;
+                        r2.push_back(x);
+                    }
                 }
+            }else{
+                printf("No existe el atributo'%s' en la tabla\n",d2.col->val->str);
             }
-            std_stack.push(r2);
+            d3.intval =  (r2.size() > 0) ? 1 : 0;
             break;
         case INTNUM: /* Comparando enteros */
             d3.intval = d1.col->val->intval == d2.col->val->intval;
             break;
     }
+    std_stack.push(r2);
     push(d3); //guardar resultado en la pila
     return 0;
 }

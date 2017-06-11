@@ -44,7 +44,6 @@ private:
 	std::string nombreArchivo;
 	std::vector<std::string> definicion;
 	void limpiaBuffer();
-	bool existColumns(std::vector<std::string> nombre_atributos);
 	std::vector<std::string> getAttributeNames(str_registro busqueda);
 public:
 	/*Crea una nueva tabla con un nombre especificado*/
@@ -81,5 +80,7 @@ public:
 	bool save();
 	/*Obtiene el nombre de la tabla como un std::string*/
 	std::string getTableName();
+	/*Verifica la existencia de una lista de columnas*/
+	bool existColumns(std::vector<std::string> nombre_atributos);
 };
 #endif //TABLA_H
