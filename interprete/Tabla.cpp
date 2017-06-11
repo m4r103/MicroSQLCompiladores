@@ -192,13 +192,16 @@ bool Tabla::modificiarRegistro(str_registro busqueda)
 	if (!existColumns(getAttributeNames(busqueda)))
 		return false;
 	pugi::xml_node registros = this->tabla.child("registros");
-	for (pugi::xml_node registro : registros.children())
+	for (pugi::xml_node registro = registros.first_child(); registro; registro = registro.next_sibling())
 	{
 		if (std::atoi(registro.child_value()) == busqueda.id)
+		{
 			for (auto x : busqueda.atributo_valor)
 			{
 				registro.attribute(x.first.c_str()).set_value(x.second.c_str());
+				save();
 			}
+		}
 	}
 	return true;
 }
