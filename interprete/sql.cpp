@@ -191,7 +191,8 @@ int insert(){
                     r1.atributo_valor.insert(std::pair<std::string,std::string>(c->val->nombre,v->val->val->str));
                     break;
                 case INTNUM:
-                    printf("%s = %d\n", c->val->nombre, v->val->val->intval);
+                    r1.atributo_valor.insert(std::pair<std::string,std::string>(c->val->nombre,std::to_string(v->val->val->intval)));
+                    // printf("%s = %d\n", c->val->nombre, v->val->val->intval);
                     break;
             }
         }
@@ -386,6 +387,7 @@ int updatesql(){
                 // printf("%s = '%s'\n", c->val->nombre, c->val->val->str);
                 break;
             case INTNUM:
+                 r1.atributo_valor.insert(std::pair<std::string,std::string>(c->val->nombre,std::to_string(c->val->val->intval)));
                 // printf("%s = %d\n", c->val->nombre, c->val->val->intval);
                 break;
         }
@@ -417,11 +419,13 @@ int updatesql(){
             x.atributo_valor.at(y.first) = y.second;
         }
     }     
+    int f=0;
     for(auto &x : registros)
     {
+        f++;
         miTabla.modificiarRegistro(x);
     }
-
+    printf("%d, filas modificadas\n",f);
     return 0;
 }
 int wheresql(Inst *codigoWhere){
