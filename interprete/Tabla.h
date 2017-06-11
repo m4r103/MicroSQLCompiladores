@@ -48,9 +48,11 @@ private:
 	std::vector<std::string> getAttributeNames(str_registro busqueda);
 public:
 	/*Crea una nueva tabla con un nombre especificado*/
-	Tabla(std::string nombre);
 	Tabla();
+	Tabla(std::string nombre);
 	~Tabla();
+	/*Leer tabla*/
+	int leerTabla(std::string nombre);
 	/*Agrega una nueva columna*/
 	void addColumna(std::string nombre, int size);
 	/*Elimina la columna especificada*/
@@ -75,6 +77,7 @@ public:
 	bool insertarRegistro(str_registro insertar);
 	/*Obtiene los nombres de las columnas como un std::vector<std::string>*/
 	std::vector<std::string> getColumnas();
+	/*Guarda la tabla*/
 	bool save();
 	/*Obtiene el nombre de la tabla como un std::string*/
 	std::string getTableName();

@@ -11,35 +11,8 @@ void Tabla::limpiaBuffer()
 
 Tabla::Tabla()
 {
-	this->nombreArchivo = "file.xml";
-	this->nombreTabla = "sinnombre";
-	pugi::xml_parse_result result = this->documento.load_file("file.xml");
-	if (!result)
-	{
-		std::cout << "Creando archivo" << std::endl;
-		pugi::xml_node decl = this->documento.prepend_child(pugi::node_declaration);
-		decl.append_attribute("version") = "1.0";
-		decl.append_attribute("encoding") = "UTF-8";
-		decl.append_attribute("standalone") = "no";
-
-		this->tabla = this->documento.append_child("tabla");
-
-		pugi::xml_node defi = this->tabla.append_child("definicion");
-		pugi::xml_node registros = this->tabla.append_child("registros");
-		this->documento.save_file("file.xml");
-	}
-	if (result)
-	{
-		std::cout << "Archivo cargado" << std::endl;
-		this->tabla = this->documento.first_child();
-		pugi::xml_node defi = this->tabla.child("definicion");
-		pugi::xml_attribute name;
-		for (pugi::xml_node columna = defi.first_child(); columna; columna = columna.next_sibling())
-		{
-			name = columna.attribute("nombre");
-			this->definicion.push_back((char*)name.value());
-		}
-	}
+	this->nombreArchivo ="";
+	this->nombreTabla = "";
 }
 /*Crea una nueva tabla con un nombre especificado*/
 Tabla::Tabla(std::string nombre)
@@ -76,9 +49,35 @@ Tabla::Tabla(std::string nombre)
 	}
 }
 
+int Tabla::leerTabla(std::string nombre)
+{
+	this->nombreTabla = nombre;
+	nombre += ".xml";
+	this->nombreArchivo = nombre;
+	/*Modo lectura*/
+	int status = 1;
+	pugi::xml_parse_result result = this->documento.load_file(nombre.c_str());
+	if (result)
+	{
+		// std::cout << "Archivo cargado" << std::endl;
+		this->tabla = this->documento.first_child();
+		pugi::xml_node defi = this->tabla.child("definicion");
+		pugi::xml_attribute name;
+		for (pugi::xml_node columna = defi.first_child(); columna; columna = columna.next_sibling())
+		{
+			name = columna.attribute("nombre");
+			this->definicion.push_back((char*)name.value());
+		}
+	}
+	else
+		status = 0;
+	return status;
+}
+
+
 Tabla::~Tabla()
 {
-	this->documento.save_file(this->nombreArchivo.c_str());
+	//this->documento.save_file(this->nombreArchivo.c_str());
 }
 /*Agrega una nueva columna*/
 void Tabla::addColumna(std::string nombre, int size)
