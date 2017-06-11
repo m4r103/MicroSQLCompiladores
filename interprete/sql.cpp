@@ -197,10 +197,11 @@ int selectsql(){
     // printf("Campos:\n");
     std::vector<std::string> attrib;
     Tabla miTabla;
+    int existe = 1;
     if(!miTabla.leerTabla(d1.str))
     {
         std::cout << "No existe la tabla : " << d1.str << std::endl;
-        return 0;
+        existe = 0;
     }
     std_stack.push(miTabla.leerRegistros());
     Column *campos;
@@ -223,28 +224,47 @@ int selectsql(){
         //} end for
         pc++;
     }
-    
-    if(campos == 0){
-        // printf("* (Todos)\n");
-        for(auto &x : miTabla.getColumnas())    //Imprime los atributos
-            std::cout << x << " | ";
-
-        std::cout << std::endl;
-        std::vector<str_registro> registros = std_stack.top();
-        std_stack.pop();
-
-        for(auto&x : registros)
-        {
-            for(auto &y : miTabla.getColumnas())
-               std::cout << x.atributo_valor.at(y) << " | ";    //Imprime los valores de cada registro
+    if(existe)
+    {
+        if(campos == 0){
+            // printf("* (Todos)\n");
+            std::cout << "Atributos" << std:: endl;
+            std::cout << "-------------------------------" << std::endl;
+            for(auto &x : miTabla.getColumnas())    //Imprime los atributos
+                std::cout << x << " | ";
             std::cout << std::endl;
-        }
+            std::cout <<  "-------------------------------" << std::endl;
+            std::vector<str_registro> registros = std_stack.top();
+            std_stack.pop();
 
-    }else{
-        for(c = campos; c!=0; c = c->next){
-            // printf("%s\n", c->val->nombre);
-            attrib.push_back(c->val->nombre);   
-        }
+            for(auto&x : registros)
+            {
+                for(auto &y : miTabla.getColumnas())
+                std::cout << x.atributo_valor.at(y) << " | ";    //Imprime los valores de cada registro
+                std::cout << std::endl;
+            }
+
+        }else{
+            for(c = campos; c!=0; c = c->next){
+                // printf("%s\n", c->val->nombre);
+                attrib.push_back(c->val->nombre);   
+            }
+            std::cout << "Atributos" << std:: endl;            
+            std::cout << "-------------------------------" << std::endl;
+            for(auto &x : attrib)
+                std::cout << x << " | ";
+            std::cout << std::endl;
+            std::cout << "-------------------------------" << std::endl;
+            std::vector<str_registro> registros = std_stack.top();
+            std_stack.pop();
+
+            for(auto &x : registros)
+            {
+                for(auto &y : attrib)
+                    std::cout << x.atributo_valor.at(y) << " | ";
+                std::cout << std::endl;
+            }
+        }       
     }
     
     return 0;
