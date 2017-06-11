@@ -394,7 +394,7 @@ int updatesql(){
     where = (Datum *)*pc++;
     if(where == 0){return 0;} // Sin where, actualizar todo
     else{ // Incluye where
-        printf("Where\n");
+        // printf("Where\n");
         Inst *codigoWhere = pc;
         //for cada registro{
             pc = codigoWhere;
@@ -429,7 +429,7 @@ int wheresql(Inst *codigoWhere){
     pc = codigoWhere;
     while(*pc != STOP){ // Ejecucion de codigo de where
         if(*pc == log_and || *pc == log_or){    //Ejecucion de and u or
-            printf("and u or\n");
+            // printf("and u or\n");
             execute(pc); 
             pc++;
             continue;
@@ -437,7 +437,7 @@ int wheresql(Inst *codigoWhere){
         execute(pc); //Insertar operandos en la pila
         pc++;
         d1 = pop();
-        printf("Atributo a comparar %s\n", d1.col->nombre);
+        // printf("Atributo a comparar %s\n", d1.col->nombre);
         // printf("Valor atributo %s\n", d1.col->val->str);
         /* Actualizar atributo con valor del registro actual */
         /*Si el atributo es string*/
