@@ -328,7 +328,10 @@ int deletesql(){
 
 
      // Sin where, eliminar todo
-    if(where != 0){ // Incluye where
+    if(where == 0)
+    {
+    }
+    else{ // Incluye where
         // printf("Where\n");
         Inst *codigoWhere = pc;
         //for cada registro{
