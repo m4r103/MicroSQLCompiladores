@@ -158,7 +158,8 @@ int createTable(){
                 miTabla.addColumna(itera->val->nombre,itera->val->len);
                 break;
             case INTNUM:
-                printf("int\n");
+                miTabla.addColumna(itera->val->nombre,itera->val->len);                
+                // printf("int\n");
             break;
         }
     }
