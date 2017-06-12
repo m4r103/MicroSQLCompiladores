@@ -16,3 +16,16 @@ delete from alumno where nombre = "jorge";
 update alumno set nombre = "jose", apellido = "Ruiz", correo = "jruiz@gmail.com", id = 10;
 update alumno set nombre = "jose", apellido = "Ruiz", correo = "jruiz@gmail.com", id = 10 where nombre = "jorge";
 update alumno set nombre = "jose", apellido = "Ruiz", correo = "jruiz@gmail.com", id = 10 where nombre = "jorge" and apellido = "gomez";
+
+create table perros (id int,nombre varchar(16),edad int, dueno varchar(16),raza varchar(16),sexo varchar(16));
+insert into perros (id,nombre,edad,dueno,raza,sexo) values(1,'fido',2,'Teodoro','mestizo','macho');
+insert into perros (id,nombre,edad,dueno,raza,sexo) values(2,'lasie',4,'Maria','colie','hembra');
+insert into perros (id,nombre,edad,dueno,raza,sexo) values(3,'fido',3,'Mario','mestizo','macho');
+insert into perros (id,nombre,edad,dueno,raza,sexo) values(4,'firulais',2,'Maria','colie','macho');
+
+select * from perros;
+select * from perros where nombre='fido';
+select * from perros where nombre='fido' and sexo='macho';
+select * from perros where nombre='fido' or sexo='macho'
+select dueno from perros;
+select dueno from perros where nombre='fido';
