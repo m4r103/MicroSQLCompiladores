@@ -505,7 +505,7 @@ int eq(){ /* d1 = d2 */
                     std::string d = x.atributo_valor.at(d2.col->val->str);
                     if(std::atoi(d.c_str()) == d1.col->val->intval)
                     {
-                        printf("es igual\n");
+                        // printf("es igual\n");
                         r2.push_back(x);
                     }
                 }
@@ -550,7 +550,7 @@ int gt(){
                     std::string d = x.atributo_valor.at(d2.col->val->str);
                     if(std::atoi(d.c_str()) < d1.col->val->intval)
                     {
-                        printf("%d es mayor que %d \n",std::atoi(d.c_str()),d1.col->val->intval);
+                        // printf("%d es mayor que %d \n",std::atoi(d.c_str()),d1.col->val->intval);
                         r2.push_back(x);
                     }
                 }
@@ -597,7 +597,7 @@ int ge(){
                     std::string d = x.atributo_valor.at(d2.col->val->str);
                     if(std::atoi(d.c_str()) <= d1.col->val->intval)
                     {
-                        printf("es mayor o igual\n");
+                        // printf("es mayor o igual\n");
                         r2.push_back(x);
                     }
                 }
@@ -689,7 +689,7 @@ int le(){
                     std::string d = x.atributo_valor.at(d2.col->val->str);
                     if(std::atoi(d.c_str()) >= d1.col->val->intval)
                     {
-                         printf("es menor o igual\n");
+                        //  printf("es menor o igual\n");
                         r2.push_back(x);
                     }
                 }
