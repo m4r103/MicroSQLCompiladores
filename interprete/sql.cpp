@@ -265,7 +265,7 @@ int selectsql(){
             // printf("* (Todos)\n");
             std::vector<str_registro> registros = std_stack.back();
             std_stack.pop_back();
-            std::cout << "Atributos" << std:: endl;
+            std::cout << std::endl << "Atributos" << std:: endl;
             std::cout << "-------------------------------" << std::endl;
             for(auto &x : miTabla.getColumnas())    //Imprime los atributos
                 std::cout << x << " | ";
@@ -274,9 +274,11 @@ int selectsql(){
             for(auto &x : registros)
             {
                 for(auto &y : miTabla.getColumnas())
-                std::cout << x.atributo_valor.at(y) << " | ";    //Imprime los valores de cada registro
+                    std::cout << x.atributo_valor.at(y) << " | ";    //Imprime los valores de cada registro
                 std::cout << std::endl;
             }
+            std::cout << "-------------------------------" << std::endl << std::endl;
+            
 
         }else{
             std::vector<str_registro> registros = std_stack.back();
@@ -302,7 +304,7 @@ int selectsql(){
             }
             if(existe)
             {
-                std::cout << "Atributos" << std:: endl;            
+                std::cout << std::endl << "Atributos" << std:: endl;            
                 std::cout << "-------------------------------" << std::endl;
                 for(auto &x : attrib)
                     std::cout << x << " | ";
@@ -315,6 +317,8 @@ int selectsql(){
                         std::cout << x.atributo_valor.at(y) << " | ";
                     std::cout << std::endl;
                 }
+                std::cout << "-------------------------------" << std::endl << std::endl;
+                
             }
         }       
     }
