@@ -73,6 +73,9 @@ expr:         expr '=' expr{
                                     code2(colpush, (Inst)$1); code2(colpush, (Inst)$3); code(STOP); code2(eq, STOP);
                                 }
                             }
+            |'(' expr ')'   {
+                                $$ = $2;    
+                            }
             | expr GT expr {
                                 if($1->type == 0){
                                     code2(colpush, (Inst)$3); code2(colpush, (Inst)$1); code(STOP); code2(lt, STOP);
