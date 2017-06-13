@@ -44,19 +44,21 @@ private:
 	std::string nombreArchivo;
 	std::vector<std::string> definicion;
 	void limpiaBuffer();
-	bool existColumns(std::vector<std::string> nombre_atributos);
 	std::vector<std::string> getAttributeNames(str_registro busqueda);
 public:
 	/*Crea una nueva tabla con un nombre especificado*/
-	Tabla(std::string nombre);
 	Tabla();
+	Tabla(std::string nombre);
 	~Tabla();
+	/*Leer tabla*/
+	int leerTabla(std::string nombre);
 	/*Agrega una nueva columna*/
 	void addColumna(std::string nombre, int size);
 	/*Elimina la columna especificada*/
 	bool removeColumna(std::string nombre);
 	/*/Muestra en pantalla las columnas*/
 	void desplegarListaColumnas();
+	/*Devuelve el numero de columnas*/	
 	int getNumeroColumnas();
 	/*Modifica el xml con los valores de str_registro.atributo_valor donde el id sea igual a str_registro.id
 	en caso de error retorna false*/
@@ -74,8 +76,11 @@ public:
 	bool insertarRegistro(str_registro insertar);
 	/*Obtiene los nombres de las columnas como un std::vector<std::string>*/
 	std::vector<std::string> getColumnas();
+	/*Guarda la tabla*/
 	bool save();
 	/*Obtiene el nombre de la tabla como un std::string*/
 	std::string getTableName();
+	/*Verifica la existencia de una lista de columnas*/
+	bool existColumns(std::vector<std::string> nombre_atributos);
 };
 #endif //TABLA_H

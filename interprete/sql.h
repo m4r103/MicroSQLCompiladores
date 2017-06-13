@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
+#include "Tabla.h"
 
 typedef int (*Inst)(void);
 typedef struct  Symbol      Symbol;

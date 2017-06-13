@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<tabla>
+	<definicion>
+		<columna nombre="sexo" size="16" />
+		<columna nombre="raza" size="16" />
+		<columna nombre="dueno" size="16" />
+		<columna nombre="anios" size="0" />
+		<columna nombre="meses" size="0" />
+		<columna nombre="nombre" size="16" />
+		<columna nombre="id" size="0" />
+	</definicion>
+	<registros>
+		<registro sexo="macho" raza="mestizo" dueno="Teodoro" anios="2" meses="0" nombre="fido" id="1">1</registro>
+		<registro sexo="hembra" raza="colie" dueno="Maria" anios="4" meses="0" nombre="lasie" id="2">2</registro>
+		<registro sexo="hembra" raza="mestizo" dueno="Mario" anios="3" meses="0" nombre="fido" id="3">3</registro>
+		<registro sexo="macho" raza="mestizo" dueno="Teodoro" anios="4" meses="0" nombre="fido" id="5">5</registro>
+		<registro sexo="hembra" raza="dalmata" dueno="Edgar" anios="0" meses="2" nombre="daisy" id="6">6</registro>
+		<registro sexo="hembra" raza="colie" dueno="Edgar" anios="0" meses="4" nombre="lasie" id="7">7</registro>
+		<registro sexo="hembra" raza="dalmata" dueno="Eduardo" anios="0" meses="5" nombre="luna" id="8">8</registro>
+		<registro sexo="hembra" raza="boxer" dueno="Eduardo" anios="0" meses="1" nombre="kira" id="9">9</registro>
+		<registro sexo="hembra" raza="boxer" dueno="Raul" anios="0" meses="1" nombre="lola" id="10">10</registro>
+		<registro sexo="macho" raza="boxer" dueno="Raul" anios="1" meses="0" nombre="kira" id="11">11</registro>
+		<registro sexo="macho" raza="colie" dueno="Laura" anios="3" meses="0" nombre="max" id="13">13</registro>
+		<registro sexo="hembra" raza="dalmata" dueno="Laura" anios="3" meses="0" nombre="lola" id="14">14</registro>
+		<registro sexo="macho" raza="dalmata" dueno="Bruno" anios="6" meses="0" nombre="bruno" id="15">15</registro>
+	</registros>
+</tabla>

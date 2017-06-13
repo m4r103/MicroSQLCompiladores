@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<tabla>
+	<definicion>
+		<columna nombre="anio" size="4" />
+		<columna nombre="director" size="16" />
+		<columna nombre="titulo" size="16" />
+	</definicion>
+	<registros>
+		<registro anio="2002" director="Jonatham Frakes" titulo="Clockstoppers">1</registro>
+		<registro anio="2009" director="Helen Hunt" titulo="Then she found me">2</registro>
+		<registro anio="2008" director="Madonna" titulo="Filth and Wisdom">3</registro>
+		<registro anio="2003" director="Dominique Abel" titulo="Poligono Sur">4</registro>
+		<registro anio="1989" director="Alejandro Agresti" titulo="Boda secreta">5</registro>
+		<registro anio="1998" director="Alejandro Agresti" titulo="La cruz">6</registro>
+	</registros>
+</tabla>

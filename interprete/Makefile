@@ -1,12 +1,12 @@
-Gram=y.tab.c y.tab.h
+Gram=sql.tab.cpp sql.tab.hpp
 
 all: $(Gram) 
-	@gcc -o calc y.tab.c sql.c -lm -Wall
+	@g++ -std=c++11 -o microsql sql.tab.cpp Tabla.cpp pugixml.cpp sql.cpp -lm -Wall
 	@echo Compiled
 
-$(Gram): sql.y
-	@yacc -d sql.y
+$(Gram): sql.ypp
+	@bison -d sql.ypp
 
 clean:
-	@rm -f *.out  *.tab.* calc
+	@rm -f *.out  *.tab.* microsql *.exe
 	@echo Clean

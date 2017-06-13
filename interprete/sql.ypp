@@ -73,6 +73,9 @@ expr:         expr '=' expr{
                                     code2(colpush, (Inst)$1); code2(colpush, (Inst)$3); code(STOP); code2(eq, STOP);
                                 }
                             }
+            |'(' expr ')'   {
+                                $$ = $2;    
+                            }
             | expr GT expr {
                                 if($1->type == 0){
                                     code2(colpush, (Inst)$3); code2(colpush, (Inst)$1); code(STOP); code2(lt, STOP);
@@ -239,6 +242,7 @@ update_asgn_list:   NAME '=' expr {$3->nombre = $1->str; $$ = columnlist($3, 0);
 #include <signal.h>
 #include <setjmp.h>
 #include <string.h>
+#include <ctype.h>
 
 char *progname;
 int lineno = 1;
@@ -294,7 +298,7 @@ int yylex (){
 		Symbol *s;
 		char sbuf[200], *p=sbuf;
 		do {
-			*p++=c;
+			*p++=tolower(c);
 		} while ((c=getchar())!=EOF && isalnum(c));
 		ungetc(c, stdin);
 		*p='\0';
