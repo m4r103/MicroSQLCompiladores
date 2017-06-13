@@ -29,3 +29,4 @@ select * from perros where nombre='fido' and sexo='macho';
 select * from perros where nombre='fido' or sexo='macho'
 select dueno from perros;
 select dueno from perros where nombre='fido';
+select * from perros where nombre='fido' and sexo='macho' and edad='2';

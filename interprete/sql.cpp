@@ -296,21 +296,25 @@ int selectsql(){
                 if(existe == 0)
                 {
                     printf("No existe el atributo '%s' en la tabla\n",c->val->nombre);
+                    break;
                 }  
                 attrib.push_back(c->val->nombre); 
             }
-            std::cout << "Atributos" << std:: endl;            
-            std::cout << "-------------------------------" << std::endl;
-            for(auto &x : attrib)
-                std::cout << x << " | ";
-            std::cout << std::endl;
-            std::cout << "-------------------------------" << std::endl;
-            
-            for(auto &x : registros)
+            if(existe)
             {
-                for(auto &y : attrib)
-                    std::cout << x.atributo_valor.at(y) << " | ";
+                std::cout << "Atributos" << std:: endl;            
+                std::cout << "-------------------------------" << std::endl;
+                for(auto &x : attrib)
+                    std::cout << x << " | ";
                 std::cout << std::endl;
+                std::cout << "-------------------------------" << std::endl;
+                
+                for(auto &x : registros)
+                {
+                    for(auto &y : attrib)
+                        std::cout << x.atributo_valor.at(y) << " | ";
+                    std::cout << std::endl;
+                }
             }
         }       
     }
