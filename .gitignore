@@ -261,7 +261,6 @@ __pycache__/
 *.pyc
 
 # Otros
-*.xml
 *.exe
 *.o
 *.tab.cpp
